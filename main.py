@@ -6,7 +6,35 @@ app = QApplication([])
 
 # Main Window
 window = QWidget()
-layout = QVBoxLayout()
+main_layout = QHBoxLayout()
+
+# Sidebar (Left)
+sidebar = QVBoxLayout()
+
+whatsapp_btn = QPushButton("WhatsApp")
+youtube_btn = QPushButton("Youtube")
+gmail_btn = QPushButton("Gmail")
+
+sidebar.addWidget(whatsapp_btn)
+sidebar.addWidget(youtube_btn)
+sidebar.addWidget(gmail_btn)
+sidebar.addStretch()
+
+# Sidebar button actions
+whatsapp_btn.clicked.connect(
+    lambda: add_tab("https://web.whatsapp.com")
+)
+
+youtube_btn.clicked.connect(
+    lambda: add_tab("https://www.youtube.com")
+)
+
+gmail_btn.clicked.connect(
+    lambda: add_tab("https://mail.google.com")
+)
+
+# Right Side
+right_layout = QVBoxLayout()
 
 # Nav bar
 nav_bar = QHBoxLayout()
@@ -86,11 +114,14 @@ tabs.currentChanged.connect(tab_changed)
 # Initial Tab
 add_tab()
 
-# Add to layout
-layout.addLayout(nav_bar)
-layout.addWidget(tabs)
+# Main Layout
+right_layout.addLayout(nav_bar)
+right_layout.addWidget(tabs)
 
-window.setLayout(layout)
+main_layout.addLayout(sidebar, 1)
+main_layout.addLayout(right_layout, 5)
+
+window.setLayout(main_layout)
 window.resize(1000, 700)
 window.show()
 
