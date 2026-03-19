@@ -1,0 +1,23 @@
+/* Sidebar container */
+#sidebar {
+    background-color: #151515;
+    border-right: 1px solid #262626;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: transparent;
+    border-radius: 24px;
+    border: none;
+    padding: 6px;
+}
+
+/* Hover effect (soft glow) */
+QPushButton:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Pressed */
+QPushButton:pressed {
+    background-color: rgba(255, 255, 255, 0.15);
+}
