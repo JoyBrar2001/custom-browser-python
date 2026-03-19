@@ -44,7 +44,7 @@ class Sidebar(QWidget):
         self.animation.setEasingCurve(QEasingCurve.InOutCubic)
 
         # Styling
-        self.setStyleSheet(load_stylesheet("styles/sidebar.qss"))
+        self.setStyleSheet(load_stylesheet("styles/ui/sidebar.qss"))
 
     def set_tabs(self, tabs):
         self.tabs = tabs
