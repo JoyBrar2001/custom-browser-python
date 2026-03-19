@@ -1,0 +1,57 @@
+/* Entire tab container */
+#tabs {
+    background: transparent;
+}
+
+#webContainer {
+    background: white;
+    border-radius: 12px;
+}
+
+/* Tab bar */
+QTabBar {
+    background: transparent;
+}
+
+/* Individual tabs */
+QTabBar::tab {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    border-radius: 10px;
+    padding: 6px 12px;
+    margin-right: 6px;
+}
+
+/* Hover */
+QTabBar::tab:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* Active tab */
+QTabBar::tab:selected {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* Close button spacing fix */
+QTabBar::close-button {
+    subcontrol-position: right;
+}
+
+QWidget {
+  color: white;
+}
+
+/* Close button */
+QPushButton {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 12px;
+}
+
+/* Hover */
+QPushButton:hover {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
