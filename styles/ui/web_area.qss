@@ -1,0 +1,5 @@
+#webArea {
+    border-radius: 16px;              /* Rounded corners */
+    background-color: rgba(30, 30, 30, 200); /* Dark transparent background */
+    border: 1px solid rgba(255, 255, 255, 30); /* Subtle border */
+}
