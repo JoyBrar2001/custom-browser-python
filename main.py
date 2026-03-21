@@ -2,16 +2,12 @@ import sys
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QHBoxLayout, QVBoxLayout, QLabel,
-    QPushButton, QLineEdit, QTabWidget
+    QPushButton, QLineEdit, QTabWidget,
+    QDialog
 )
 from PyQt5.QtWebEngineWidgets import QWebEngineProfile, QWebEngineView
 from PyQt5.QtCore import QUrl, Qt
-
-bookmarks = [
-    { "title": "Facebook", "path": "https://www.facebook.com" },
-    { "title": "Instagram", "path": "https://www.instagram.com" },
-    { "title": "Youtube", "path": "https://www.youtube.com" },
-]
+from utils.json_handler import read_file, write_file
 
 class Tabs(QWidget):
     def __init__(self):
@@ -70,6 +66,7 @@ class Sidebar(QWidget):
         self.initBookmarks()
 
     def initBookmarks(self):
+        bookmarks = read_file("config/bookmarks.json")
         # Clear old buttons (important if re-rendering)
         for i in reversed(range(1, self.sidebar_layout.count())):
             widget = self.sidebar_layout.itemAt(i).widget()
@@ -113,6 +110,7 @@ class Navbar(QWidget):
         self.navbar_layout.addWidget(self.forward_btn)
         self.navbar_layout.addWidget(self.reload_btn)
         self.navbar_layout.addWidget(self.search_bar)
+        self.navbar_layout.addWidget(self.star_button)
         self.navbar_layout.addWidget(self.add_tab_button)
 
         self.current_browser = None
@@ -125,6 +123,9 @@ class Navbar(QWidget):
         self.search_bar.returnPressed.connect(self.load_url)
 
         self.on_tab_changed()
+        
+    def bind_sidebar(self, sidebar: Sidebar):
+        self.sidebar = sidebar
 
     def on_tab_changed(self):
         browser = self.tabs.get_current_browser()
@@ -137,6 +138,7 @@ class Navbar(QWidget):
             self.back_btn.clicked.disconnect()
             self.forward_btn.clicked.disconnect()
             self.reload_btn.clicked.disconnect()
+            self.star_button.clicked.disconnect()
         except:
             pass
 
@@ -148,10 +150,52 @@ class Navbar(QWidget):
         self.back_btn.clicked.connect(browser.back)
         self.forward_btn.clicked.connect(browser.forward)
         self.reload_btn.clicked.connect(browser.reload)
+        self.star_button.clicked.connect(lambda: self.handle_bookmark(self.current_browser))
 
         browser.urlChanged.connect(self.update_ui)
 
         self.update_ui()
+
+    def handle_bookmark(self, browser: QWebEngineView):
+        self.dialog = QDialog()
+        
+        dialog_layout = QVBoxLayout()
+        
+        dialog_label = QLabel("Add Website to Bookmarks")
+        dialog_name = QLabel("Name")
+        dialog_name_input = QLineEdit()
+        dialog_submit = QPushButton("Submit")
+        
+        dialog_name_input.setText(browser.title())
+        dialog_submit.clicked.connect(
+            lambda: self.handle_bookmark_submit(
+                dialog_name_input.text(), 
+                browser.url().toString()
+            )
+        )
+        # print(browser.url())
+        
+        dialog_layout.addWidget(dialog_label)
+        dialog_layout.addWidget(dialog_name)
+        dialog_layout.addWidget(dialog_name_input)
+        dialog_layout.addWidget(dialog_submit)
+        
+        self.dialog.setLayout(dialog_layout)
+        
+        self.dialog.exec_()
+    
+    def handle_bookmark_submit(self, name, path):
+        write_file(
+            "config/bookmarks.json",
+            lambda data: data + [{
+                "title": name,
+                "path": path
+            }]
+        )
+        
+        self.sidebar.initBookmarks()
+        
+        self.dialog.close()
 
     def update_ui(self):
         if not self.current_browser:
@@ -190,6 +234,7 @@ class MainWindow(QMainWindow):
         self.right_layout = QVBoxLayout(self.right_widget)
 
         self.navbar = Navbar()
+        self.navbar.bind_sidebar(self.sidebar)
         self.tabs = Tabs()
 
         self.navbar.bind_tabs(self.tabs)
