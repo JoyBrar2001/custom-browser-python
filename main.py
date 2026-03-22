@@ -4,11 +4,11 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QHBoxLayout, QVBoxLayout, QLabel,
     QPushButton, QLineEdit, QTabWidget,
-    QDialog
+    QDialog, QShortcut
 )
 from PyQt5.QtWebEngineWidgets import QWebEngineProfile, QWebEngineView
 from PyQt5.QtCore import QUrl, Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QKeySequence
 from utils.json_handler import read_file, write_file
 
 class Tabs(QWidget):
@@ -22,6 +22,15 @@ class Tabs(QWidget):
         self.layout.addWidget(self.tabs_widget)
 
         self.tabs_widget.tabCloseRequested.connect(self.close_tab)
+        
+        self.new_tab_shortcut = QShortcut(QKeySequence("Ctrl+T"), self)
+        self.new_tab_shortcut.activated.connect(self.add_tab)
+        
+        self.close_tab_shortcut = QShortcut(QKeySequence("Ctrl+W"), self)
+        self.close_tab_shortcut.activated.connect(self.close_current_tab)
+
+        self.reload_shortcut = QShortcut(QKeySequence("Ctrl+R"), self)
+        self.reload_shortcut.activated.connect(lambda: self.get_current_browser().reload())
 
         self.add_tab("https://google.com")
 
@@ -42,6 +51,10 @@ class Tabs(QWidget):
         browser.iconChanged.connect(
             lambda icon, browser=browser: self.update_tab_icon(browser, icon)
         )
+        
+    def close_current_tab(self) -> None:
+        index = self.tabs_widget.currentIndex()
+        self.close_tab(index)
 
     def update_tab_title(self, browser: QWebEngineView, title: str) -> None:
         index = self.tabs_widget.indexOf(browser)
@@ -57,7 +70,7 @@ class Tabs(QWidget):
         if self.tabs_widget.count() > 1:
             self.tabs_widget.removeTab(index)
 
-    def get_current_browser(self):
+    def get_current_browser(self) -> QWebEngineView:
         return self.tabs_widget.currentWidget()
 
 class Sidebar(QWidget):
