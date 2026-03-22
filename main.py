@@ -1,4 +1,5 @@
 import sys
+from typing import Optional
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QHBoxLayout, QVBoxLayout, QLabel,
@@ -10,7 +11,7 @@ from PyQt5.QtCore import QUrl, Qt
 from utils.json_handler import read_file, write_file
 
 class Tabs(QWidget):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.layout = QVBoxLayout(self)
@@ -23,7 +24,7 @@ class Tabs(QWidget):
 
         self.add_tab("https://google.com")
 
-    def add_tab(self, url=None):
+    def add_tab(self, url: Optional[str]=None) -> None:
         if not isinstance(url, str):
             url = "https://google.com"
             
@@ -37,12 +38,12 @@ class Tabs(QWidget):
             lambda qurl, browser=browser: self.update_tab_title(browser, qurl)
         )
 
-    def update_tab_title(self, browser, qurl):
+    def update_tab_title(self, browser: QWebEngineView, qurl: QUrl) -> None:
         index = self.tabs_widget.indexOf(browser)
         if index != -1:
             self.tabs_widget.setTabText(index, qurl.toString()[:20])
 
-    def close_tab(self, index):
+    def close_tab(self, index: int) -> None:
         if self.tabs_widget.count() > 1:
             self.tabs_widget.removeTab(index)
 
@@ -50,7 +51,7 @@ class Tabs(QWidget):
         return self.tabs_widget.currentWidget()
 
 class Sidebar(QWidget):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.sidebar_layout = QVBoxLayout(self)
@@ -59,13 +60,13 @@ class Sidebar(QWidget):
         self.sidebar_layout.addWidget(self.sidebar_label)
         self.sidebar_layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
 
-        self.tabs = None  # will be set later
+        self.tabs = None
 
-    def bind_tabs(self, tabs):
+    def bind_tabs(self, tabs: Tabs) -> None:
         self.tabs = tabs
         self.initBookmarks()
 
-    def initBookmarks(self):
+    def initBookmarks(self) -> None:
         bookmarks = read_file("config/bookmarks.json")
         # Clear old buttons (important if re-rendering)
         for i in reversed(range(1, self.sidebar_layout.count())):
@@ -84,7 +85,7 @@ class Sidebar(QWidget):
             # Fix lambda closure + signal argument
             btn.clicked.connect(lambda _, p=path: self.open_url(p))
 
-    def open_url(self, url):
+    def open_url(self, url: str) -> None:
         if not self.tabs:
             return
 
@@ -93,7 +94,7 @@ class Sidebar(QWidget):
             browser.setUrl(QUrl(url))
 
 class Navbar(QWidget):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self.navbar_layout = QHBoxLayout(self)
@@ -115,7 +116,7 @@ class Navbar(QWidget):
 
         self.current_browser = None
 
-    def bind_tabs(self, tabs):
+    def bind_tabs(self, tabs: Tabs) -> None:
         self.tabs = tabs
 
         self.add_tab_button.clicked.connect(self.tabs.add_tab)
@@ -124,10 +125,10 @@ class Navbar(QWidget):
 
         self.on_tab_changed()
         
-    def bind_sidebar(self, sidebar: Sidebar):
+    def bind_sidebar(self, sidebar: Sidebar) -> None:
         self.sidebar = sidebar
 
-    def on_tab_changed(self):
+    def on_tab_changed(self) -> None:
         browser = self.tabs.get_current_browser()
         if not browser:
             return
@@ -156,7 +157,7 @@ class Navbar(QWidget):
 
         self.update_ui()
 
-    def handle_bookmark(self, browser: QWebEngineView):
+    def handle_bookmark(self, browser: QWebEngineView) -> None:
         self.dialog = QDialog()
         
         dialog_layout = QVBoxLayout()
@@ -173,7 +174,6 @@ class Navbar(QWidget):
                 browser.url().toString()
             )
         )
-        # print(browser.url())
         
         dialog_layout.addWidget(dialog_label)
         dialog_layout.addWidget(dialog_name)
@@ -184,7 +184,7 @@ class Navbar(QWidget):
         
         self.dialog.exec_()
     
-    def handle_bookmark_submit(self, name, path):
+    def handle_bookmark_submit(self, name: str, path: str) -> None:
         write_file(
             "config/bookmarks.json",
             lambda data: data + [{
@@ -197,7 +197,7 @@ class Navbar(QWidget):
         
         self.dialog.close()
 
-    def update_ui(self):
+    def update_ui(self) -> None:
         if not self.current_browser:
             return
 
@@ -207,7 +207,7 @@ class Navbar(QWidget):
         if not self.search_bar.hasFocus():
             self.search_bar.setText(self.current_browser.url().toString())
 
-    def load_url(self):
+    def load_url(self) -> None:
         url = self.search_bar.text().strip()
 
         if "." not in url:
@@ -218,11 +218,11 @@ class Navbar(QWidget):
         self.current_browser.setUrl(QUrl(url))
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.initUI()
 
-    def initUI(self):
+    def initUI(self) -> None:
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
 
