@@ -1,32 +1,62 @@
-from PyQt5.QtWidgets import QTabWidget
+from typing import Optional
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QShortcut
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtCore import QUrl
+from PyQt5.QtGui import QKeySequence
 
-class TabManager(QTabWidget):
+class Tabs(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setTabsClosable(True)
-        self.tabCloseRequested.connect(self.close_tab)
+        layout = QVBoxLayout(self)
+        self.tabs_widget = QTabWidget()
+        self.tabs_widget.setTabsClosable(True)
 
-        self.add_tab()
+        layout.addWidget(self.tabs_widget)
 
-    def current_browser(self):
-        return self.currentWidget()
+        self.tabs_widget.tabCloseRequested.connect(self.close_tab)
 
-    def add_tab(self, url="https://www.google.com"):
+        QShortcut(QKeySequence("Ctrl+T"), self).activated.connect(self.add_tab)
+        QShortcut(QKeySequence("Ctrl+W"), self).activated.connect(self.close_current_tab)
+        QShortcut(QKeySequence("Ctrl+R"), self).activated.connect(
+            lambda: self.get_current_browser().reload()
+        )
+
+        self.add_tab("https://google.com")
+
+    def add_tab(self, url: Optional[str] = None):
+        if not isinstance(url, str):
+            url = "https://google.com"
+
         browser = QWebEngineView()
         browser.setUrl(QUrl(url))
 
-        i = self.addTab(browser, "New Tab")
-        self.setCurrentIndex(i)
+        index = self.tabs_widget.addTab(browser, "New Tab")
+        self.tabs_widget.setCurrentIndex(index)
 
         browser.titleChanged.connect(
-            lambda title, browser=browser: self.setTabText(
-                self.indexOf(browser), title[:15]
-            )
+            lambda title, b=browser: self.update_tab_title(b, title)
+        )
+        browser.iconChanged.connect(
+            lambda icon, b=browser: self.update_tab_icon(b, icon)
         )
 
+    def close_current_tab(self):
+        self.close_tab(self.tabs_widget.currentIndex())
+
     def close_tab(self, index):
-        if self.count() > 1:
-            self.removeTab(index)
+        if self.tabs_widget.count() > 1:
+            self.tabs_widget.removeTab(index)
+
+    def update_tab_title(self, browser, title):
+        index = self.tabs_widget.indexOf(browser)
+        if index != -1:
+            self.tabs_widget.setTabText(index, title[:20])
+
+    def update_tab_icon(self, browser, icon):
+        index = self.tabs_widget.indexOf(browser)
+        if index != -1:
+            self.tabs_widget.setTabIcon(index, icon)
+
+    def get_current_browser(self):
+        return self.tabs_widget.currentWidget()

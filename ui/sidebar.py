@@ -1,95 +1,87 @@
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton
-from PyQt5.QtCore import QPropertyAnimation, QEasingCurve, QSize, Qt
-from utils.get_icon import get_icon
-from utils.load_stylesheet import load_stylesheet
+import requests
+from PyQt5.QtWidgets import (
+    QWidget, QHBoxLayout, QVBoxLayout,
+    QPushButton, QLabel, QStackedWidget, QSizePolicy
+)
+from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtCore import Qt, QUrl, QSize
+from PyQt5.QtGui import QIcon, QPixmap
+from utils.json_handler import read_file
 
 class Sidebar(QWidget):
     def __init__(self):
         super().__init__()
-        
-        self.setObjectName("sidebar")
-        self.setAttribute(Qt.WA_StyledBackground, True)
+
+        self.container_layout = QHBoxLayout(self)
+
+        self.tabs_layout = QVBoxLayout()
+        self.tabs_layout.setAlignment(Qt.AlignTop)
+
+        self.btn_bookmarks = QPushButton("📌")
+        self.btn_whatsapp = QPushButton("💬")
+        self.btn_chatgpt = QPushButton("🤖")
+
+        for btn in [self.btn_bookmarks, self.btn_whatsapp, self.btn_chatgpt]:
+            btn.setFixedSize(40, 40)
+            self.tabs_layout.addWidget(btn)
+
+        self.stack = QStackedWidget()
+        self.stack.setMinimumWidth(0)
+        self.stack.setMaximumWidth(600)
+        self.stack.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+
+        # Pages
+        self.bookmarks_page = QWidget()
+        self.bookmarks_layout = QVBoxLayout(self.bookmarks_page)
+        self.bookmarks_layout.addWidget(QLabel("Bookmarks"))
+        self.bookmarks_layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+
+        self.whatsapp_browser = QWebEngineView()
+        self.whatsapp_browser.setUrl(QUrl("https://web.whatsapp.com"))
+
+        self.chatgpt_browser = QWebEngineView()
+        self.chatgpt_browser.setUrl(QUrl("https://chat.openai.com"))
+
+        self.stack.addWidget(self.bookmarks_page)
+        self.stack.addWidget(self.whatsapp_browser)
+        self.stack.addWidget(self.chatgpt_browser)
+
+        self.container_layout.addLayout(self.tabs_layout)
+        self.container_layout.addWidget(self.stack)
+
+        self.btn_bookmarks.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        self.btn_whatsapp.clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        self.btn_chatgpt.clicked.connect(lambda: self.stack.setCurrentIndex(2))
 
         self.tabs = None
-        self.expanded = True
 
-        self.setMinimumWidth(0)
-        self.setMaximumWidth(80)
-
-        layout = QVBoxLayout(self)
-        layout.setSpacing(14)
-        layout.setContentsMargins(8, 20, 8, 20)
-
-        self.whatsapp = QPushButton()
-        self.youtube = QPushButton()
-        self.gmail = QPushButton()
-        
-        self.whatsapp.setIcon(get_icon("https://web.whatsapp.com"))
-        self.youtube.setIcon(get_icon("https://youtube.com"))
-        self.gmail.setIcon(get_icon("https://mail.google.com"))
-
-        self.buttons = [self.whatsapp, self.youtube, self.gmail]
-        self.active_button = None
-
-        for btn in self.buttons:
-            btn.setFixedSize(48, 48)
-            btn.setIconSize(QSize(26, 26))
-            layout.addWidget(btn)
-
-        layout.addStretch()
-
-        # Animation
-        self.animation = QPropertyAnimation(self, b"maximumWidth")
-        self.animation.setDuration(200)
-        self.animation.setEasingCurve(QEasingCurve.InOutCubic)
-
-        # Styling
-        self.setStyleSheet(load_stylesheet("styles/ui/sidebar.qss"))
-
-    def set_tabs(self, tabs):
+    def bind_tabs(self, tabs):
         self.tabs = tabs
+        self.initBookmarks()
 
-        self.whatsapp.clicked.connect(
-            lambda: [
-                self.tabs.add_tab("https://web.whatsapp.com"),
-                self.set_active(self.whatsapp)
-            ]
-        )
-        self.youtube.clicked.connect(
-            lambda: [
-                self.tabs.add_tab("https://youtube.com"),
-                self.set_active(self.youtube)
-            ]
-        )
-        self.gmail.clicked.connect(
-            lambda: [
-                self.tabs.add_tab("https://mail.google.com"),
-                self.set_active(self.gmail)
-            ]
-        )
-        
-    def set_active(self, btn):
-        for button in self.buttons:
-            button.setStyleSheet("")
-        
-        btn.setStyleSheet("""
-            QPushButton {
-                background-color: rgba(255, 255, 255, 0.15);
-                border-radius: 24px;
-            }
-        """)
-        
-        self.active_button = btn
+    def initBookmarks(self):
+        bookmarks = read_file("config/bookmarks.json")
 
-    def toggle(self):
-        current_width = self.width()
+        for bookmark in bookmarks:
+            btn = QPushButton(bookmark["title"])
 
-        if self.expanded:
-            self.animation.setStartValue(current_width)
-            self.animation.setEndValue(0)
-        else:
-            self.animation.setStartValue(current_width)
-            self.animation.setEndValue(80)
+            domain = QUrl(bookmark["path"]).host()
+            icon_url = f"https://www.google.com/s2/favicons?domain={domain}"
 
-        self.animation.start()
-        self.expanded = not self.expanded
+            try:
+                response = requests.get(icon_url)
+                pixmap = QPixmap()
+                pixmap.loadFromData(response.content)
+                btn.setIcon(QIcon(pixmap))
+                btn.setIconSize(QSize(16, 16))
+            except:
+                pass
+
+            btn.clicked.connect(lambda _, p=bookmark["path"]: self.open_url(p))
+            self.bookmarks_layout.addWidget(btn)
+
+    def open_url(self, url):
+        if self.tabs:
+            browser = self.tabs.get_current_browser()
+            if browser:
+                browser.setUrl(QUrl(url))
