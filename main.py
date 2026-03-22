@@ -5,7 +5,8 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QHBoxLayout, QVBoxLayout, QLabel,
     QPushButton, QLineEdit, QTabWidget,
-    QDialog, QShortcut
+    QDialog, QShortcut, QStackedWidget,
+    QSizePolicy
 )
 from PyQt5.QtWebEngineWidgets import QWebEngineProfile, QWebEngineView
 from PyQt5.QtCore import QUrl, Qt, QPropertyAnimation, QSize
@@ -77,15 +78,61 @@ class Tabs(QWidget):
 class Sidebar(QWidget):
     def __init__(self) -> None:
         super().__init__()
-        
-        self.setMaximumWidth(200)
-        
-        self.sidebar_layout = QVBoxLayout(self)
-        self.sidebar_label = QLabel("Your Bookmarks")
 
-        self.sidebar_layout.addWidget(self.sidebar_label)
-        self.sidebar_layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        self.container = QWidget()
+        self.container_layout = QHBoxLayout(self.container)
+        
+        self.tabs_layout = QVBoxLayout()
+        self.tabs_layout.setAlignment(Qt.AlignTop)
+        
+        self.btn_bookmarks = QPushButton("📌")
+        self.btn_whatsapp = QPushButton("💬")
+        self.btn_chatgpt = QPushButton("🤖")
 
+        for btn in [self.btn_bookmarks, self.btn_whatsapp, self.btn_chatgpt]:
+            btn.setFixedSize(40, 40)
+            self.tabs_layout.addWidget(btn)
+
+        self.stack = QStackedWidget()
+        self.stack.setMinimumWidth(0)
+        self.stack.setMaximumWidth(300)
+        self.stack.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        
+        # Page 1 - Bookmarks
+        self.bookmarks_page = QWidget()
+        self.bookmarks_layout = QVBoxLayout(self.bookmarks_page)
+        
+        self.bookmarks_label = QLabel("Bookmarks")
+        self.bookmarks_layout.addWidget(self.bookmarks_label)
+        self.bookmarks_layout.setAlignment(Qt.AlignTop)
+        
+        # Page 2 - Whatsapp
+        self.whatsapp_browser = QWebEngineView()
+        self.whatsapp_browser.setUrl(QUrl("https://web.whatsapp.com"))
+        
+        # Page 3 - ChatGPT
+        self.chatgpt_browser = QWebEngineView()
+        self.chatgpt_browser.setUrl(QUrl("https://chat.openai.com"))
+
+        # Add to stack
+        self.stack.addWidget(self.bookmarks_page)
+        self.stack.addWidget(self.whatsapp_browser)
+        self.stack.addWidget(self.chatgpt_browser)
+        
+        # Layout assembly
+        self.container_layout.addLayout(self.tabs_layout)
+        self.container_layout.addWidget(self.stack)
+        
+        self.container_layout.setSpacing(5)
+        self.container_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Bind clicks
+        self.btn_bookmarks.clicked.connect(lambda: self.stack.setCurrentIndex(0))
+        self.btn_whatsapp.clicked.connect(lambda: self.stack.setCurrentIndex(1))
+        self.btn_chatgpt.clicked.connect(lambda: self.stack.setCurrentIndex(2))
+
+        self.setLayout(self.container_layout)
+        
         self.tabs = None
 
     def bind_tabs(self, tabs: Tabs) -> None:
@@ -95,8 +142,8 @@ class Sidebar(QWidget):
     def initBookmarks(self) -> None:
         bookmarks = read_file("config/bookmarks.json")
         # Clear old buttons (important if re-rendering)
-        for i in reversed(range(1, self.sidebar_layout.count())):
-            widget = self.sidebar_layout.itemAt(i).widget()
+        for i in reversed(range(1, self.bookmarks_layout.count())):
+            widget = self.bookmarks_layout.itemAt(i).widget()
             if widget:
                 widget.deleteLater()
 
@@ -119,7 +166,7 @@ class Sidebar(QWidget):
             except:
                 pass
 
-            self.sidebar_layout.addWidget(btn)
+            self.bookmarks_layout.addWidget(btn)
 
             # Fix lambda closure + signal argument
             btn.clicked.connect(lambda _, p=path: self.open_url(p))
@@ -221,14 +268,30 @@ class TopBar(QWidget):
         if not self.sidebar:
             return
 
-        current_width = self.sidebar.width()
-        new_width = 0 if current_width > 0 else 200
+        stack = self.sidebar.stack
+
+        if not hasattr(self, "sidebar_open"):
+            self.sidebar_open = True
+
+        start = stack.maximumWidth()
+        end = 0 if self.sidebar_open > 0 else 300
         
-        self.sidebar_animation = QPropertyAnimation(self.sidebar, b"maximumWidth")
-        self.sidebar_animation.setDuration(200)
-        self.sidebar_animation.setStartValue(current_width)
-        self.sidebar_animation.setEndValue(new_width)
-        self.sidebar_animation.start()
+        self.sidebar_open = not self.sidebar_open
+        
+         # Animate maximumWidth
+        self.animation = QPropertyAnimation(stack, b"maximumWidth")
+        self.animation.setDuration(200)
+        self.animation.setStartValue(start)
+        self.animation.setEndValue(end)
+
+        # ALSO animate minimumWidth (CRITICAL)
+        self.animation2 = QPropertyAnimation(stack, b"minimumWidth")
+        self.animation2.setDuration(200)
+        self.animation2.setStartValue(start)
+        self.animation2.setEndValue(end)
+
+        self.animation.start()
+        self.animation2.start()
 
     def on_tab_changed(self):
         browser = self.tabs.get_current_browser()
@@ -345,8 +408,8 @@ class MainWindow(QMainWindow):
         self.topbar.bind_sidebar(self.sidebar)
         self.sidebar.bind_tabs(self.tabs)
 
-        self.content_layout.addWidget(self.sidebar, 1)
-        self.content_layout.addWidget(self.tabs, 5)
+        self.content_layout.addWidget(self.sidebar)
+        self.content_layout.addWidget(self.tabs)
 
         self.main_layout.addWidget(self.topbar)
         self.main_layout.addWidget(self.content)
