@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtWebEngineWidgets import QWebEngineProfile, QWebEngineView
 from PyQt5.QtCore import QUrl, Qt
+from PyQt5.QtGui import QIcon
 from utils.json_handler import read_file, write_file
 
 class Tabs(QWidget):
@@ -34,14 +35,23 @@ class Tabs(QWidget):
         index = self.tabs_widget.addTab(browser, "New Tab")
         self.tabs_widget.setCurrentIndex(index)
 
-        browser.urlChanged.connect(
-            lambda qurl, browser=browser: self.update_tab_title(browser, qurl)
+        browser.titleChanged.connect(
+            lambda title, browser=browser: self.update_tab_title(browser, title)
+        )
+        
+        browser.iconChanged.connect(
+            lambda icon, browser=browser: self.update_tab_icon(browser, icon)
         )
 
-    def update_tab_title(self, browser: QWebEngineView, qurl: QUrl) -> None:
+    def update_tab_title(self, browser: QWebEngineView, title: str) -> None:
         index = self.tabs_widget.indexOf(browser)
         if index != -1:
-            self.tabs_widget.setTabText(index, qurl.toString()[:20])
+            self.tabs_widget.setTabText(index, title[:20])
+
+    def update_tab_icon(self, browser: QWebEngineView, icon) -> None:
+        index = self.tabs_widget.indexOf(browser)
+        if index != -1:
+            self.tabs_widget.setTabIcon(index, icon)
 
     def close_tab(self, index: int) -> None:
         if self.tabs_widget.count() > 1:
