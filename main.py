@@ -1,4 +1,5 @@
 import sys
+import requests
 from typing import Optional
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget,
@@ -7,49 +8,9 @@ from PyQt5.QtWidgets import (
     QDialog, QShortcut
 )
 from PyQt5.QtWebEngineWidgets import QWebEngineProfile, QWebEngineView
-from PyQt5.QtCore import QUrl, Qt
-from PyQt5.QtGui import QKeySequence, QMouseEvent
+from PyQt5.QtCore import QUrl, Qt, QPropertyAnimation, QSize
+from PyQt5.QtGui import QKeySequence, QMouseEvent, QIcon, QPixmap
 from utils.json_handler import read_file, write_file
-
-class TitleBar(QWidget):
-    def __init__(self, parent: QMainWindow):
-        super().__init__()
-        
-        self.parent = parent
-        
-        layout = QHBoxLayout(self)
-        
-        self.title = QLabel("My Browser")
-        
-        self.min_button = QPushButton("-")
-        self.max_button = QPushButton("+")
-        self.close_button = QPushButton("X")
-        
-        layout.addWidget(self.title)
-        layout.addStretch()
-        layout.addWidget(self.min_button)
-        layout.addWidget(self.max_button)
-        layout.addWidget(self.close_button)
-        
-        self.setLayout(layout)
-        
-        self.min_button.clicked.connect(self.parent.showMinimized)
-        self.max_button.clicked.connect(self.toggle_maximized)
-        self.close_button.clicked.connect(self.parent.close)
-
-    def toggle_maximized(self) -> None:
-        if self.parent.isMaximized():
-            self.parent.showNormal()
-        else:
-            self.parent.showMaximized()
-            
-    def mousePressEvent(self, event: QMouseEvent):
-        self.old_pos = event.globalPos()
-        
-    def mouseMoveEvent(self, event: QMouseEvent):
-        delta = event.globalPos() - self.old_pos
-        self.parent.move(self.parent.pos() + delta)
-        self.old_pos = event.globalPos()
 
 class Tabs(QWidget):
     def __init__(self) -> None:
@@ -116,7 +77,9 @@ class Tabs(QWidget):
 class Sidebar(QWidget):
     def __init__(self) -> None:
         super().__init__()
-
+        
+        self.setMaximumWidth(200)
+        
         self.sidebar_layout = QVBoxLayout(self)
         self.sidebar_label = QLabel("Your Bookmarks")
 
@@ -141,8 +104,21 @@ class Sidebar(QWidget):
         for bookmark in bookmarks:
             title = bookmark["title"]
             path = bookmark["path"]
-
+            
             btn = QPushButton(title)
+            
+            domain = QUrl(path).host()
+            icon_url = f"https://www.google.com/s2/favicons?domain={domain}"
+            
+            try:
+                response = requests.get(icon_url)
+                pixmap = QPixmap()
+                pixmap.loadFromData(response.content)
+                btn.setIcon(QIcon(pixmap))
+                btn.setIconSize(QSize(16, 16))
+            except:
+                pass
+
             self.sidebar_layout.addWidget(btn)
 
             # Fix lambda closure + signal argument
@@ -156,42 +132,105 @@ class Sidebar(QWidget):
         if browser:
             browser.setUrl(QUrl(url))
 
-class Navbar(QWidget):
-    def __init__(self) -> None:
+class TopBar(QWidget):
+    def __init__(self, parent: QMainWindow):
         super().__init__()
 
-        self.navbar_layout = QHBoxLayout(self)
+        self.parent = parent
+        self.tabs = None
+        self.sidebar = None
 
-        self.back_btn = QPushButton("Back")
-        self.forward_btn = QPushButton("Forward")
-        self.reload_btn = QPushButton("Reload")
+        layout = QHBoxLayout(self)
+
+        # Navigation
+        self.back_btn = QPushButton("←")
+        self.forward_btn = QPushButton("→")
+        self.toggle_sidebar_btn = QPushButton("☰")
+
         self.search_bar = QLineEdit()
         self.search_bar.setPlaceholderText("Search or enter URL")
-        self.star_button = QPushButton("Star")
-        self.add_tab_button = QPushButton("+")
 
-        self.navbar_layout.addWidget(self.back_btn)
-        self.navbar_layout.addWidget(self.forward_btn)
-        self.navbar_layout.addWidget(self.reload_btn)
-        self.navbar_layout.addWidget(self.search_bar)
-        self.navbar_layout.addWidget(self.star_button)
-        self.navbar_layout.addWidget(self.add_tab_button)
+        self.reload_btn = QPushButton("⟳")
+        self.star_btn = QPushButton("★")
+        self.add_tab_btn = QPushButton("+")
 
-        self.current_browser = None
+        # Window controls
+        self.min_btn = QPushButton("-")
+        self.max_btn = QPushButton("□")
+        self.close_btn = QPushButton("X")
 
-    def bind_tabs(self, tabs: Tabs) -> None:
+        # Layout
+        layout.addWidget(self.back_btn)
+        layout.addWidget(self.forward_btn)
+        layout.addWidget(self.toggle_sidebar_btn)
+        layout.addStretch()
+
+        layout.addWidget(self.search_bar, 1)
+
+        layout.addWidget(self.reload_btn)
+        layout.addWidget(self.star_btn)
+        layout.addWidget(self.add_tab_btn)
+
+        layout.addStretch()
+
+        layout.addWidget(self.min_btn)
+        layout.addWidget(self.max_btn)
+        layout.addWidget(self.close_btn)
+
+        # Connections
+        self.min_btn.clicked.connect(self.parent.showMinimized)
+        self.max_btn.clicked.connect(self.toggle_maximized)
+        self.close_btn.clicked.connect(self.parent.close)
+
+    # ---------- Window Drag ----------
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.LeftButton:
+            self.old_pos = event.globalPos()
+
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if event.buttons() == Qt.LeftButton:
+            delta = event.globalPos() - self.old_pos
+            self.parent.move(self.parent.pos() + delta)
+            self.old_pos = event.globalPos()
+
+    def mouseDoubleClickEvent(self, event: QMouseEvent):
+        if event.button() == Qt.LeftButton:
+            self.toggle_maximized()
+
+    def toggle_maximized(self):
+        if self.parent.isMaximized():
+            self.parent.showNormal()
+        else:
+            self.parent.showMaximized()
+
+    # ---------- Bindings ----------
+    def bind_tabs(self, tabs: Tabs):
         self.tabs = tabs
 
-        self.add_tab_button.clicked.connect(self.tabs.add_tab)
+        self.add_tab_btn.clicked.connect(self.tabs.add_tab)
         self.tabs.tabs_widget.currentChanged.connect(self.on_tab_changed)
         self.search_bar.returnPressed.connect(self.load_url)
 
         self.on_tab_changed()
-        
-    def bind_sidebar(self, sidebar: Sidebar) -> None:
-        self.sidebar = sidebar
 
-    def on_tab_changed(self) -> None:
+    def bind_sidebar(self, sidebar: Sidebar):
+        self.sidebar = sidebar
+        self.toggle_sidebar_btn.clicked.connect(self.toggle_sidebar)
+
+    def toggle_sidebar(self):
+        if not self.sidebar:
+            return
+
+        current_width = self.sidebar.width()
+        new_width = 0 if current_width > 0 else 200
+        
+        self.sidebar_animation = QPropertyAnimation(self.sidebar, b"maximumWidth")
+        self.sidebar_animation.setDuration(200)
+        self.sidebar_animation.setStartValue(current_width)
+        self.sidebar_animation.setEndValue(new_width)
+        self.sidebar_animation.start()
+
+    def on_tab_changed(self):
         browser = self.tabs.get_current_browser()
         if not browser:
             return
@@ -202,7 +241,7 @@ class Navbar(QWidget):
             self.back_btn.clicked.disconnect()
             self.forward_btn.clicked.disconnect()
             self.reload_btn.clicked.disconnect()
-            self.star_button.clicked.disconnect()
+            self.star_btn.clicked.disconnect()
         except:
             pass
 
@@ -214,53 +253,15 @@ class Navbar(QWidget):
         self.back_btn.clicked.connect(browser.back)
         self.forward_btn.clicked.connect(browser.forward)
         self.reload_btn.clicked.connect(browser.reload)
-        self.star_button.clicked.connect(lambda: self.handle_bookmark(self.current_browser))
+        self.star_btn.clicked.connect(
+            lambda: self.handle_bookmark(self.current_browser)
+        )
 
         browser.urlChanged.connect(self.update_ui)
 
         self.update_ui()
 
-    def handle_bookmark(self, browser: QWebEngineView) -> None:
-        self.dialog = QDialog()
-        
-        dialog_layout = QVBoxLayout()
-        
-        dialog_label = QLabel("Add Website to Bookmarks")
-        dialog_name = QLabel("Name")
-        dialog_name_input = QLineEdit()
-        dialog_submit = QPushButton("Submit")
-        
-        dialog_name_input.setText(browser.title())
-        dialog_submit.clicked.connect(
-            lambda: self.handle_bookmark_submit(
-                dialog_name_input.text(), 
-                browser.url().toString()
-            )
-        )
-        
-        dialog_layout.addWidget(dialog_label)
-        dialog_layout.addWidget(dialog_name)
-        dialog_layout.addWidget(dialog_name_input)
-        dialog_layout.addWidget(dialog_submit)
-        
-        self.dialog.setLayout(dialog_layout)
-        
-        self.dialog.exec_()
-    
-    def handle_bookmark_submit(self, name: str, path: str) -> None:
-        write_file(
-            "config/bookmarks.json",
-            lambda data: data + [{
-                "title": name,
-                "path": path
-            }]
-        )
-        
-        self.sidebar.initBookmarks()
-        
-        self.dialog.close()
-
-    def update_ui(self) -> None:
+    def update_ui(self):
         if not self.current_browser:
             return
 
@@ -270,7 +271,7 @@ class Navbar(QWidget):
         if not self.search_bar.hasFocus():
             self.search_bar.setText(self.current_browser.url().toString())
 
-    def load_url(self) -> None:
+    def load_url(self):
         url = self.search_bar.text().strip()
 
         if "." not in url:
@@ -280,6 +281,43 @@ class Navbar(QWidget):
 
         self.current_browser.setUrl(QUrl(url))
 
+    # ---------- Bookmark ----------
+    def handle_bookmark(self, browser: QWebEngineView):
+        dialog = QDialog()
+
+        layout = QVBoxLayout()
+
+        name_input = QLineEdit()
+        name_input.setText(browser.title())
+
+        submit = QPushButton("Save")
+
+        submit.clicked.connect(
+            lambda: self.save_bookmark(
+                dialog,
+                name_input.text(),
+                browser.url().toString()
+            )
+        )
+
+        layout.addWidget(QLabel("Bookmark Name"))
+        layout.addWidget(name_input)
+        layout.addWidget(submit)
+
+        dialog.setLayout(layout)
+        dialog.exec_()
+
+    def save_bookmark(self, dialog, name, path):
+        write_file(
+            "config/bookmarks.json",
+            lambda data: data + [{"title": name, "path": path}]
+        )
+
+        if self.sidebar:
+            self.sidebar.initBookmarks()
+
+        dialog.close()
+
 class MainWindow(QMainWindow):
     def __init__(self) -> None:
         super().__init__()
@@ -287,32 +325,31 @@ class MainWindow(QMainWindow):
 
     def initUI(self) -> None:
         self.setWindowFlags(Qt.FramelessWindowHint)
-        
+
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
 
-        self.main_layout = QHBoxLayout(self.central_widget)
-        
-        self.title_bar = TitleBar(self)
+        self.main_layout = QVBoxLayout(self.central_widget)
+
+        # Topbar
+        self.topbar = TopBar(self)
+
+        # Content area
+        self.content = QWidget()
+        self.content_layout = QHBoxLayout(self.content)
 
         self.sidebar = Sidebar()
-
-        self.right_widget = QWidget()
-        self.right_layout = QVBoxLayout(self.right_widget)
-
-        self.navbar = Navbar()
-        self.navbar.bind_sidebar(self.sidebar)
         self.tabs = Tabs()
 
-        self.navbar.bind_tabs(self.tabs)
+        self.topbar.bind_tabs(self.tabs)
+        self.topbar.bind_sidebar(self.sidebar)
         self.sidebar.bind_tabs(self.tabs)
 
-        self.right_layout.insertWidget(0, self.title_bar)
-        self.right_layout.addWidget(self.navbar, 1)
-        self.right_layout.addWidget(self.tabs, 5)
+        self.content_layout.addWidget(self.sidebar, 1)
+        self.content_layout.addWidget(self.tabs, 5)
 
-        self.main_layout.addWidget(self.sidebar, 1)
-        self.main_layout.addWidget(self.right_widget, 5)
+        self.main_layout.addWidget(self.topbar)
+        self.main_layout.addWidget(self.content)
 
 def main():
     app = QApplication(sys.argv)
