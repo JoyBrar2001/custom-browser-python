@@ -8,18 +8,58 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtWebEngineWidgets import QWebEngineProfile, QWebEngineView
 from PyQt5.QtCore import QUrl, Qt
-from PyQt5.QtGui import QKeySequence
+from PyQt5.QtGui import QKeySequence, QMouseEvent
 from utils.json_handler import read_file, write_file
+
+class TitleBar(QWidget):
+    def __init__(self, parent: QMainWindow):
+        super().__init__()
+        
+        self.parent = parent
+        
+        layout = QHBoxLayout(self)
+        
+        self.title = QLabel("My Browser")
+        
+        self.min_button = QPushButton("-")
+        self.max_button = QPushButton("+")
+        self.close_button = QPushButton("X")
+        
+        layout.addWidget(self.title)
+        layout.addStretch()
+        layout.addWidget(self.min_button)
+        layout.addWidget(self.max_button)
+        layout.addWidget(self.close_button)
+        
+        self.setLayout(layout)
+        
+        self.min_button.clicked.connect(self.parent.showMinimized)
+        self.max_button.clicked.connect(self.toggle_maximized)
+        self.close_button.clicked.connect(self.parent.close)
+
+    def toggle_maximized(self) -> None:
+        if self.parent.isMaximized():
+            self.parent.showNormal()
+        else:
+            self.parent.showMaximized()
+            
+    def mousePressEvent(self, event: QMouseEvent):
+        self.old_pos = event.globalPos()
+        
+    def mouseMoveEvent(self, event: QMouseEvent):
+        delta = event.globalPos() - self.old_pos
+        self.parent.move(self.parent.pos() + delta)
+        self.old_pos = event.globalPos()
 
 class Tabs(QWidget):
     def __init__(self) -> None:
         super().__init__()
 
-        self.layout = QVBoxLayout(self)
+        layout = QVBoxLayout(self)
         self.tabs_widget = QTabWidget()
         self.tabs_widget.setTabsClosable(True)
 
-        self.layout.addWidget(self.tabs_widget)
+        layout.addWidget(self.tabs_widget)
 
         self.tabs_widget.tabCloseRequested.connect(self.close_tab)
         
@@ -246,10 +286,14 @@ class MainWindow(QMainWindow):
         self.initUI()
 
     def initUI(self) -> None:
+        self.setWindowFlags(Qt.FramelessWindowHint)
+        
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
 
         self.main_layout = QHBoxLayout(self.central_widget)
+        
+        self.title_bar = TitleBar(self)
 
         self.sidebar = Sidebar()
 
@@ -263,6 +307,7 @@ class MainWindow(QMainWindow):
         self.navbar.bind_tabs(self.tabs)
         self.sidebar.bind_tabs(self.tabs)
 
+        self.right_layout.insertWidget(0, self.title_bar)
         self.right_layout.addWidget(self.navbar, 1)
         self.right_layout.addWidget(self.tabs, 5)
 
@@ -284,7 +329,6 @@ def main():
     window.show()
 
     sys.exit(app.exec_())
-
 
 if __name__ == "__main__":
     main()
