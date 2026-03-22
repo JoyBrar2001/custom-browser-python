@@ -1,12 +1,14 @@
-import requests
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QVBoxLayout,
     QPushButton, QLabel, QStackedWidget, QSizePolicy
 )
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import Qt, QUrl, QSize
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtCore import Qt, QUrl, QSize
+from PyQt6.QtGui import QIcon, QPixmap
+
+from utils.get_favicon import get_favicon_from_url
 from utils.json_handler import read_file
+from utils.get_favicon import get_favicon_from_url
 
 class Sidebar(QWidget):
     def __init__(self):
@@ -15,11 +17,15 @@ class Sidebar(QWidget):
         self.container_layout = QHBoxLayout(self)
 
         self.tabs_layout = QVBoxLayout()
-        self.tabs_layout.setAlignment(Qt.AlignTop)
+        self.tabs_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         self.btn_bookmarks = QPushButton("📌")
-        self.btn_whatsapp = QPushButton("💬")
-        self.btn_chatgpt = QPushButton("🤖")
+        self.btn_whatsapp = QPushButton()
+        self.whatsapp_icon = get_favicon_from_url("https://whatsapp.com")
+        self.btn_whatsapp.setIcon(self.whatsapp_icon)
+        self.btn_chatgpt = QPushButton()
+        self.chatgpt_icon = get_favicon_from_url("https://chat.openai.com")
+        self.btn_chatgpt.setIcon(self.chatgpt_icon)
 
         for btn in [self.btn_bookmarks, self.btn_whatsapp, self.btn_chatgpt]:
             btn.setFixedSize(40, 40)
@@ -28,13 +34,13 @@ class Sidebar(QWidget):
         self.stack = QStackedWidget()
         self.stack.setMinimumWidth(0)
         self.stack.setMaximumWidth(600)
-        self.stack.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
+        self.stack.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
 
         # Pages
         self.bookmarks_page = QWidget()
         self.bookmarks_layout = QVBoxLayout(self.bookmarks_page)
         self.bookmarks_layout.addWidget(QLabel("Bookmarks"))
-        self.bookmarks_layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        self.bookmarks_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
 
         self.whatsapp_browser = QWebEngineView()
         self.whatsapp_browser.setUrl(QUrl("https://web.whatsapp.com"))
@@ -65,18 +71,11 @@ class Sidebar(QWidget):
         for bookmark in bookmarks:
             btn = QPushButton(bookmark["title"])
 
-            domain = QUrl(bookmark["path"]).host()
-            icon_url = f"https://www.google.com/s2/favicons?domain={domain}"
+            icon = get_favicon_from_url(bookmark["path"])
 
-            try:
-                response = requests.get(icon_url)
-                pixmap = QPixmap()
-                pixmap.loadFromData(response.content)
-                btn.setIcon(QIcon(pixmap))
-                btn.setIconSize(QSize(16, 16))
-            except:
-                pass
-
+            btn.setIcon(icon)
+            btn.setIconSize(QSize(16, 16))
+            
             btn.clicked.connect(lambda _, p=bookmark["path"]: self.open_url(p))
             self.bookmarks_layout.addWidget(btn)
 

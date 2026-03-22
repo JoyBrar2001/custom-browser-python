@@ -1,10 +1,10 @@
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout, QPushButton, QLineEdit,
     QMainWindow, QDialog, QVBoxLayout, QLabel
 )
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QPropertyAnimation, QUrl, Qt
-from PyQt5.QtGui import QMouseEvent
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtCore import QPropertyAnimation, QUrl, Qt
+from PyQt6.QtGui import QMouseEvent
 
 from ui.tabs import Tabs
 from ui.sidebar import Sidebar

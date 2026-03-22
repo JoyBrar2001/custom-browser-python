@@ -1,13 +1,13 @@
 from typing import Optional
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QShortcut
-from PyQt5.QtWebEngineWidgets import QWebEngineView
-from PyQt5.QtCore import QUrl
-from PyQt5.QtGui import QKeySequence
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTabWidget
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtCore import QUrl
+from PyQt6.QtGui import QKeySequence, QShortcut
 
 class Tabs(QWidget):
     def __init__(self):
         super().__init__()
-
+        
         layout = QVBoxLayout(self)
         self.tabs_widget = QTabWidget()
         self.tabs_widget.setTabsClosable(True)

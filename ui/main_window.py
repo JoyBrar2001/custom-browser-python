@@ -1,5 +1,6 @@
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout
-from PyQt5.QtCore import Qt
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout
+from PyQt6.QtWebEngineCore import QWebEngineProfile, QWebEnginePage
+from PyQt6.QtCore import Qt
 
 from ui.sidebar import Sidebar
 from ui.tabs import Tabs
@@ -10,7 +11,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
 
         central = QWidget()
         self.setCentralWidget(central)
@@ -28,9 +29,16 @@ class MainWindow(QMainWindow):
         self.sidebar.bind_tabs(self.tabs)
 
         content = QHBoxLayout()
+        
         content.addWidget(self.sidebar)
         content.addWidget(self.resize_handle)
         content.addWidget(self.tabs)
 
+        content.setContentsMargins(0, 0, 0, 0)
+        content.setSpacing(0)
+
         main_layout.addWidget(self.topbar)
         main_layout.addLayout(content)
+        
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.setSpacing(0)
