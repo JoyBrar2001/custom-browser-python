@@ -13,6 +13,44 @@ from PyQt5.QtCore import QUrl, Qt, QPropertyAnimation, QSize
 from PyQt5.QtGui import QKeySequence, QMouseEvent, QIcon, QPixmap
 from utils.json_handler import read_file, write_file
 
+class ResizeHandle(QWidget):
+    def __init__(self):
+        super().__init__()
+        
+        self.setFixedWidth(5)
+        self.setCursor(Qt.SizeHorCursor)
+        
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignCenter)
+        
+        label = QLabel(":")
+        layout.addWidget(label)
+        self.setLayout(layout)
+        
+        self.dragging = False
+
+    def bind_sidebar(self, sidebar: Sidebar):
+        self.sidebar = sidebar
+    
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.LeftButton:
+            self.dragging = True
+            self.start_x = event.globalX()
+            self.start_width = self.sidebar.stack.maximumWidth()
+            
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if self.dragging:
+            delta = event.globalX() - self.start_x
+            new_width = self.start_width + delta
+            
+            new_width = max(0, min(600, new_width))
+            
+            self.sidebar.stack.setMinimumWidth(new_width)
+            self.sidebar.stack.setMaximumWidth(new_width)
+    
+    def mouseReleaseEvent(self, event: QMouseEvent):
+        self.dragging = False
+
 class Tabs(QWidget):
     def __init__(self) -> None:
         super().__init__()
@@ -95,7 +133,7 @@ class Sidebar(QWidget):
 
         self.stack = QStackedWidget()
         self.stack.setMinimumWidth(0)
-        self.stack.setMaximumWidth(300)
+        self.stack.setMaximumWidth(600)
         self.stack.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         
         # Page 1 - Bookmarks
@@ -271,10 +309,10 @@ class TopBar(QWidget):
         stack = self.sidebar.stack
 
         if not hasattr(self, "sidebar_open"):
-            self.sidebar_open = True
+            self.sidebar_open = False
 
         start = stack.maximumWidth()
-        end = 0 if self.sidebar_open > 0 else 300
+        end = 0 if self.sidebar_open > 0 else self.sidebar.stack.maximumWidth() or 600
         
         self.sidebar_open = not self.sidebar_open
         
@@ -403,12 +441,16 @@ class MainWindow(QMainWindow):
 
         self.sidebar = Sidebar()
         self.tabs = Tabs()
+        
+        self.resize_handle = ResizeHandle()
+        self.resize_handle.bind_sidebar(self.sidebar)
 
         self.topbar.bind_tabs(self.tabs)
         self.topbar.bind_sidebar(self.sidebar)
         self.sidebar.bind_tabs(self.tabs)
 
         self.content_layout.addWidget(self.sidebar)
+        self.content_layout.addWidget(self.resize_handle)
         self.content_layout.addWidget(self.tabs)
 
         self.main_layout.addWidget(self.topbar)
