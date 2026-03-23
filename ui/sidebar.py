@@ -3,8 +3,7 @@ from PyQt6.QtWidgets import (
     QPushButton, QLabel, QStackedWidget, QSizePolicy
 )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtCore import Qt, QUrl, QSize
-from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtCore import Qt, QUrl, QSize, QPropertyAnimation
 
 from utils.get_favicon import get_favicon_from_url
 from utils.json_handler import read_file
@@ -33,7 +32,7 @@ class Sidebar(QWidget):
 
         self.stack = QStackedWidget()
         self.stack.setMinimumWidth(0)
-        self.stack.setMaximumWidth(600)
+        self.stack.setMaximumWidth(200)
         self.stack.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
 
         # Pages
@@ -42,23 +41,28 @@ class Sidebar(QWidget):
         self.bookmarks_layout.addWidget(QLabel("Bookmarks"))
         self.bookmarks_layout.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignHCenter)
 
-        self.whatsapp_browser = QWebEngineView()
-        self.whatsapp_browser.setUrl(QUrl("https://web.whatsapp.com"))
+        self.whatsapp_page = QWebEngineView()
+        self.whatsapp_page.setUrl(QUrl("https://web.whatsapp.com"))
 
-        self.chatgpt_browser = QWebEngineView()
-        self.chatgpt_browser.setUrl(QUrl("https://chat.openai.com"))
+        self.chatgpt_page = QWebEngineView()
+        self.chatgpt_page.setUrl(QUrl("https://chat.openai.com"))
+
+        self.bookmarks_page.setProperty("type", "bookmarks")
+        self.whatsapp_page.setProperty("type", "web")
+        self.chatgpt_page.setProperty("type", "web")
 
         self.stack.addWidget(self.bookmarks_page)
-        self.stack.addWidget(self.whatsapp_browser)
-        self.stack.addWidget(self.chatgpt_browser)
+        self.stack.addWidget(self.whatsapp_page)
+        self.stack.addWidget(self.chatgpt_page)
 
         self.container_layout.addLayout(self.tabs_layout)
         self.container_layout.addWidget(self.stack)
 
-        self.btn_bookmarks.clicked.connect(lambda: self.stack.setCurrentIndex(0))
-        self.btn_whatsapp.clicked.connect(lambda: self.stack.setCurrentIndex(1))
-        self.btn_chatgpt.clicked.connect(lambda: self.stack.setCurrentIndex(2))
-
+        self.btn_bookmarks.clicked.connect(lambda: self.handle_page_change(0))
+        self.btn_whatsapp.clicked.connect(lambda: self.handle_page_change(1))
+        self.btn_chatgpt.clicked.connect(lambda: self.handle_page_change(2))
+        
+        self.handle_page_change(0)
         self.tabs = None
 
     def bind_tabs(self, tabs):
@@ -84,3 +88,41 @@ class Sidebar(QWidget):
             browser = self.tabs.get_current_browser()
             if browser:
                 browser.setUrl(QUrl(url))
+                
+    def handle_page_change(self, index: int):
+        widget = self.stack.widget(index)
+        page_type = widget.property("type")
+        
+        if page_type == "bookmarks":
+            width = 300
+        elif page_type == "web":
+            width = 800
+        else:
+            width = 400
+        
+        self.set_sidebar_width(width)
+        self.stack.setCurrentIndex(index)
+        
+    def get_current_width(self) -> int:
+        widget = self.stack.currentWidget()
+        page_type = widget.property("type")
+        
+        if page_type == "bookmarks":
+            return 300
+        elif page_type == "web":
+            return 800    
+        return 400
+                
+    def set_sidebar_width(self, width: int):
+        self.animation = QPropertyAnimation(self.stack, b"maximumWidth")
+        self.animation.setDuration(200)
+        self.animation.setStartValue(self.stack.width())
+        self.animation.setEndValue(width)
+        
+        self.animation2 = QPropertyAnimation(self.stack, b"minimumWidth")
+        self.animation2.setDuration(200)
+        self.animation2.setStartValue(self.stack.width())
+        self.animation2.setEndValue(width)
+        
+        self.animation.start()
+        self.animation2.start()

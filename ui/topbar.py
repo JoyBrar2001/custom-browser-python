@@ -63,17 +63,17 @@ class TopBar(QWidget):
 
     # ---------- Window Drag ----------
     def mousePressEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.old_pos = event.globalPos()
 
     def mouseMoveEvent(self, event: QMouseEvent):
-        if event.buttons() == Qt.LeftButton:
+        if event.buttons() == Qt.MouseButton.LeftButton:
             delta = event.globalPos() - self.old_pos
             self.parent.move(self.parent.pos() + delta)
             self.old_pos = event.globalPos()
 
     def mouseDoubleClickEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
+        if event.button() == Qt.MouseButton.LeftButton:
             self.toggle_maximized()
 
     def toggle_maximized(self):
@@ -103,13 +103,16 @@ class TopBar(QWidget):
         stack = self.sidebar.stack
 
         if not hasattr(self, "sidebar_open"):
-            self.sidebar_open = False
+            self.sidebar_open = True
 
         start = stack.maximumWidth()
 
         # ❌ OLD BUG: self.sidebar_open > 0
         # ✅ FIX:
-        end = 0 if self.sidebar_open else 600
+        if self.sidebar_open:
+            end = 0
+        else:
+            end = self.sidebar.get_current_width()
 
         self.sidebar_open = not self.sidebar_open
 
@@ -127,7 +130,7 @@ class TopBar(QWidget):
 
         self.animation.start()
         self.animation2.start()
-
+    
     def on_tab_changed(self):
         browser = self.tabs.get_current_browser()
         if not browser:
