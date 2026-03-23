@@ -206,7 +206,7 @@ class TopBar(QWidget):
         layout.addWidget(submit)
 
         dialog.setLayout(layout)
-        dialog.exec_()
+        dialog.exec()
 
     def save_bookmark(self, dialog, name, path):
         write_file(

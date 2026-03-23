@@ -71,6 +71,8 @@ class Sidebar(QWidget):
 
     def initBookmarks(self):
         bookmarks = read_file("config/bookmarks.json")
+        
+        self.clear_bookmarks()
 
         for bookmark in bookmarks:
             btn = QPushButton(bookmark["title"])
@@ -83,6 +85,13 @@ class Sidebar(QWidget):
             btn.clicked.connect(lambda _, p=bookmark["path"]: self.open_url(p))
             self.bookmarks_layout.addWidget(btn)
 
+    def clear_bookmarks(self):
+        while self.bookmarks_layout.count():
+            item = self.bookmarks_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+    
     def open_url(self, url):
         if self.tabs:
             browser = self.tabs.get_current_browser()
