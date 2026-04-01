@@ -6,7 +6,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtCore import Qt, QUrl, QSize, QPropertyAnimation
 
 from utils.get_favicon import get_favicon_from_url
-from utils.json_handler import read_file
+from utils.json_handler import read_file, write_file
 from utils.get_favicon import get_favicon_from_url
 
 class Sidebar(QWidget):
@@ -75,6 +75,10 @@ class Sidebar(QWidget):
         self.clear_bookmarks()
 
         for bookmark in bookmarks:
+            container = QWidget()
+            layout = QHBoxLayout(container)
+            layout.setContentsMargins(0, 0, 0, 0)
+            
             btn = QPushButton(bookmark["title"])
 
             icon = get_favicon_from_url(bookmark["path"])
@@ -83,7 +87,18 @@ class Sidebar(QWidget):
             btn.setIconSize(QSize(16, 16))
             
             btn.clicked.connect(lambda _, p=bookmark["path"]: self.open_url(p))
-            self.bookmarks_layout.addWidget(btn)
+            
+            delete_btn = QPushButton("X")
+            delete_btn.setFixedSize(20, 20)
+            
+            delete_btn.clicked.connect(
+                lambda _, p=bookmark["path"]: self.delete_bookmark(p)
+            )
+            
+            layout.addWidget(btn)
+            layout.addWidget(delete_btn)
+            
+            self.bookmarks_layout.addWidget(container)
 
     def clear_bookmarks(self):
         while self.bookmarks_layout.count():
@@ -91,6 +106,14 @@ class Sidebar(QWidget):
             widget = item.widget()
             if widget is not None:
                 widget.deleteLater()
+                
+    def delete_bookmark(self, path):
+        def update_fn(bookmarks):
+            return [b for b in bookmarks if b["path"] != path]
+
+        write_file("config/bookmarks.json", update_fn)
+
+        self.initBookmarks()
     
     def open_url(self, url):
         if self.tabs:

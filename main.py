@@ -1,6 +1,6 @@
 import sys
 from PyQt6.QtWidgets import QApplication
-from PyQt6.QtWebEngineCore import QWebEngineProfile, QWebEngineSettings
+from PyQt6.QtWebEngineCore import QWebEngineProfile
 
 from ui.main_window import MainWindow
 
