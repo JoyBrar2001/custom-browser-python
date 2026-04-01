@@ -1,3 +1,361 @@
-#root {
-    background-color: #0f0f0f;
+/* ============================================================
+   NOVA BROWSER  —  "Obsidian Glass" Dark Theme
+   Arc x Safari fusion: spatial depth, warm-tinted glass,
+   razor-thin borders, indigo-violet accent (#7B6FF0)
+   ============================================================ */
+
+/* ── Reset / Base ────────────────────────────────────────── */
+* {
+    font-family: "SF Pro Display", "Segoe UI Variable", "Helvetica Neue", sans-serif;
+    font-size: 13px;
+    color: #D4D4DC;
+    border: none;
+    outline: none;
+    margin: 0;
+    padding: 0;
+}
+
+QMainWindow,
+QWidget {
+    background-color: #0D0D10;
+}
+
+/* ── TopBar ──────────────────────────────────────────────── */
+TopBar {
+    background-color: #111116;
+    border-bottom: 1px solid #1C1C24;
+    min-height: 46px;
+    max-height: 46px;
+    padding: 0 10px;
+}
+
+/* ── URL / Search Bar ────────────────────────────────────── */
+QLineEdit {
+    background-color: #18181F;
+    color: #D4D4DC;
+    border: 1px solid #252530;
+    border-radius: 22px;
+    padding: 6px 18px;
+    font-size: 13px;
+    selection-background-color: #7B6FF0;
+    selection-color: #FFFFFF;
+}
+
+QLineEdit:focus {
+    background-color: #1C1C26;
+    border: 1px solid #7B6FF0;
+}
+
+QLineEdit:hover:!focus {
+    border: 1px solid #2E2E3E;
+}
+
+/* ── Buttons (general) ───────────────────────────────────── */
+QPushButton {
+    background-color: transparent;
+    color: #686878;
+    border-radius: 8px;
+    padding: 5px 9px;
+    font-size: 15px;
+    font-weight: 400;
+}
+
+QPushButton:hover {
+    background-color: #1A1A22;
+    color: #B8B8C8;
+}
+
+QPushButton:pressed {
+    background-color: #222230;
+    color: #D4D4DC;
+}
+
+QPushButton:disabled {
+    color: #2E2E3C;
+}
+
+/* ── Window Controls ─────────────────────────────────────── */
+QPushButton#close_btn {
+    color: #484858;
+    border-radius: 7px;
+    font-size: 12px;
+    min-width: 26px;
+    max-width: 26px;
+    min-height: 26px;
+    max-height: 26px;
+}
+
+QPushButton#close_btn:hover {
+    background-color: #5C1F1F;
+    color: #FF6B6B;
+}
+
+QPushButton#min_btn,
+QPushButton#max_btn {
+    color: #484858;
+    border-radius: 7px;
+    font-size: 12px;
+    min-width: 26px;
+    max-width: 26px;
+    min-height: 26px;
+    max-height: 26px;
+}
+
+QPushButton#min_btn:hover,
+QPushButton#max_btn:hover {
+    background-color: #1A1A22;
+    color: #B8B8C8;
+}
+
+/* ── Sidebar Container ───────────────────────────────────── */
+Sidebar {
+    background-color: #0D0D10;
+}
+
+/* ── Sidebar Icon Rail ───────────────────────────────────── */
+#sidebar_icon_bar {
+    background-color: #0F0F13;
+    border-right: 1px solid #1A1A22;
+    padding: 8px 5px;
+    min-width: 46px;
+    max-width: 46px;
+}
+
+#sidebar_icon_bar QPushButton {
+    background-color: transparent;
+    border-radius: 10px;
+    padding: 7px;
+    margin: 2px 0;
+    min-width: 36px;
+    max-width: 36px;
+    min-height: 36px;
+    max-height: 36px;
+    color: #545464;
+    font-size: 16px;
+}
+
+#sidebar_icon_bar QPushButton:hover {
+    background-color: #18181F;
+    color: #9898A8;
+}
+
+#sidebar_icon_bar QPushButton[active="true"] {
+    background-color: #1C1C2A;
+    color: #7B6FF0;
+    border-left: 2px solid #7B6FF0;
+    border-radius: 0 8px 8px 0;
+    padding-left: 5px;
+}
+
+/* ── Sidebar Stack (panel area) ──────────────────────────── */
+#sidebar_stack {
+    background-color: #0F0F14;
+    border-right: 1px solid #1A1A22;
+}
+
+/* ── Section / Panel Labels ──────────────────────────────── */
+QLabel#section_label {
+    color: #3E3E52;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    padding: 14px 14px 6px 14px;
+    background-color: transparent;
+}
+
+QLabel {
+    color: #686878;
+    font-size: 13px;
+    background-color: transparent;
+}
+
+/* ── Scroll Areas ────────────────────────────────────────── */
+QScrollArea {
+    background-color: transparent;
+    border: none;
+}
+
+QScrollArea > QWidget > QWidget {
+    background-color: transparent;
+}
+
+QScrollBar:vertical {
+    background: transparent;
+    width: 4px;
+    margin: 0;
+}
+
+QScrollBar::handle:vertical {
+    background: #252530;
+    border-radius: 2px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #7B6FF0;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical,
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: transparent;
+    height: 0;
+}
+
+QScrollBar:horizontal {
+    height: 4px;
+    background: transparent;
+}
+
+QScrollBar::handle:horizontal {
+    background: #252530;
+    border-radius: 2px;
+}
+
+/* ── Bookmark Items ──────────────────────────────────────── */
+#bookmark_item {
+    background-color: #13131A;
+    border: 1px solid #1E1E28;
+    border-radius: 10px;
+    margin: 2px 8px;
+}
+
+#bookmark_btn {
+    background-color: transparent;
+    color: #A0A0B4;
+    text-align: left;
+    padding: 7px 10px;
+    font-size: 12px;
+    border-radius: 9px;
+}
+
+#bookmark_btn:hover {
+    color: #C8C8DC;
+    background-color: transparent;
+}
+
+#delete_btn {
+    background-color: transparent;
+    color: #303040;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    min-width: 20px;
+    max-width: 20px;
+    min-height: 20px;
+    max-height: 20px;
+    padding: 0;
+    margin-right: 6px;
+}
+
+#delete_btn:hover {
+    background-color: #2A1010;
+    color: #E05555;
+}
+
+/* ── Tabs (browser tab bar) ──────────────────────────────── */
+QTabWidget::pane {
+    border: none;
+    background-color: #0D0D10;
+}
+
+QTabBar {
+    background-color: #0D0D10;
+}
+
+QTabBar::tab {
+    background-color: #111116;
+    color: #484858;
+    padding: 7px 16px;
+    border-right: 1px solid #1A1A22;
+    border-bottom: 2px solid transparent;
+    min-width: 90px;
+    max-width: 180px;
+    font-size: 12px;
+}
+
+QTabBar::tab:selected {
+    background-color: #0D0D10;
+    color: #D4D4DC;
+    border-bottom: 2px solid #7B6FF0;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #151519;
+    color: #8888A0;
+}
+
+QTabBar::close-button {
+    subcontrol-position: right;
+    padding: 2px;
+}
+
+QTabBar::close-button:hover {
+    background-color: #2A1A1A;
+    border-radius: 3px;
+}
+
+/* ── Resize Handle ───────────────────────────────────────── */
+ResizeHandle {
+    background-color: #111116;
+    min-width: 4px;
+    max-width: 4px;
+}
+
+ResizeHandle:hover {
+    background-color: #7B6FF0;
+}
+
+ResizeHandle QLabel {
+    color: transparent;
+}
+
+/* ── Dialogs ─────────────────────────────────────────────── */
+QDialog {
+    background-color: #111116;
+    border: 1px solid #1E1E2A;
+    border-radius: 12px;
+}
+
+QDialog QLabel {
+    color: #686878;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    padding-bottom: 3px;
+    background-color: transparent;
+}
+
+QDialog QLineEdit {
+    margin-bottom: 10px;
+}
+
+QDialog QPushButton {
+    background-color: #7B6FF0;
+    color: #FFFFFF;
+    border-radius: 8px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    min-width: 70px;
+}
+
+QDialog QPushButton:hover {
+    background-color: #8B7FFF;
+    color: #FFFFFF;
+}
+
+QDialog QPushButton:pressed {
+    background-color: #6B5FE0;
+}
+
+/* ── Tooltips ────────────────────────────────────────────── */
+QToolTip {
+    background-color: #1A1A22;
+    color: #C0C0D0;
+    border: 1px solid #2A2A36;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
 }
