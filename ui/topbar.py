@@ -194,7 +194,7 @@ class TopBar(QWidget):
     def save_bookmark(self, dialog, name, path):
         write_file(
             "config/bookmarks.json",
-            lambda data: data + [{"title": name, "path": path}]
+            update_fn=lambda data: data + [{"title": name, "path": path}]
         )
         if self.sidebar:
             self.sidebar.initBookmarks()

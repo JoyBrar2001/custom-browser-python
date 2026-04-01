@@ -144,7 +144,7 @@ class Sidebar(QWidget):
                 widget.deleteLater()
 
     def delete_bookmark(self, path):
-        write_file("config/bookmarks.json", lambda bm: [b for b in bm if b["path"] != path])
+        write_file("config/bookmarks.json", update_fn=lambda bm: [b for b in bm if b["path"] != path])
         self.initBookmarks()
 
     def open_url(self, url):
