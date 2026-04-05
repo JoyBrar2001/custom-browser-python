@@ -7,7 +7,7 @@ from PyQt6.QtCore import QPropertyAnimation, QUrl, Qt
 from PyQt6.QtGui import QMouseEvent
 
 from ui.tabs import Tabs
-from ui.sidebar import Sidebar
+from ui.sidebar.sidebar import Sidebar
 from utils.json_handler import write_file
 
 

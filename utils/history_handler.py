@@ -16,6 +16,11 @@ def _ensure_file():
             f.write("[]")
 
 def record(title: str, url: str):
+    print(f"""
+Record Function called for
+Title - {title}
+Url - {url}          
+""")
     if not url or url in ("about:blank", "") or url.startswith("data:"):
         return
     

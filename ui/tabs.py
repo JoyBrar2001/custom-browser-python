@@ -4,7 +4,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtCore import QUrl
 from PyQt6.QtGui import QKeySequence, QShortcut
 
-from ui.history_page import HistoryPage
+from ui.pages.history_page import HistoryPage
 
 from utils.history_handler import record
 
