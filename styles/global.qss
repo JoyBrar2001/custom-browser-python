@@ -350,6 +350,160 @@ QDialog QPushButton:pressed {
     background-color: #6B5FE0;
 }
 
+/* ── Sidebar Web Panel — Mini Nav Bar ────────────────────── */
+#sidebar_nav_bar {
+    background-color: #111116;
+    border-bottom: 1px solid #1C1C24;
+    min-height: 38px;
+    max-height: 38px;
+}
+
+#sidebar_nav_btn {
+    background-color: transparent;
+    color: #686878;
+    border-radius: 7px;
+    font-size: 14px;
+    padding: 0;
+}
+
+#sidebar_nav_btn:hover {
+    background-color: #1A1A22;
+    color: #B8B8C8;
+}
+
+#sidebar_nav_btn:pressed {
+    background-color: #222230;
+    color: #D4D4DC;
+}
+
+#sidebar_nav_btn:disabled {
+    color: #2E2E3C;
+}
+
+#sidebar_url_bar {
+    background-color: #18181F;
+    color: #888898;
+    border: 1px solid #1E1E28;
+    border-radius: 14px;
+    padding: 3px 12px;
+    font-size: 11px;
+    selection-background-color: #7B6FF0;
+}
+
+#sidebar_url_bar:focus {
+    border: 1px solid #2A2A3A;
+    color: #A8A8B8;
+}
+
+/* ── Full-tab History Page ───────────────────────────────── */
+#history_full_page {
+    background-color: #0D0D10;
+}
+
+#history_page_header {
+    background-color: #0D0D10;
+    border-bottom: 1px solid #1A1A22;
+}
+
+#history_page_title {
+    font-size: 22px;
+    font-weight: 600;
+    color: #C8C8DC;
+    background-color: transparent;
+    letter-spacing: -0.3px;
+}
+
+#history_page_clear_btn {
+    background-color: transparent;
+    color: #3A3A52;
+    font-size: 12px;
+    border: 1px solid #1E1E2A;
+    border-radius: 8px;
+    padding: 5px 14px;
+}
+
+#history_page_clear_btn:hover {
+    background-color: #2A1010;
+    border-color: #4A2020;
+    color: #E05555;
+}
+
+#history_page_scroll {
+    background-color: #0D0D10;
+    border: none;
+}
+
+#history_page_list {
+    background-color: #0D0D10;
+}
+
+#history_page_day_divider {
+    color: #2E2E42;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    padding: 20px 0 8px 0;
+    background-color: transparent;
+}
+
+#history_page_row {
+    background-color: transparent;
+    border-bottom: 1px solid #13131A;
+}
+
+#history_page_row:hover {
+    background-color: #111116;
+}
+
+#history_page_favicon {
+    background-color: transparent;
+    border-radius: 6px;
+    padding: 0;
+}
+
+#history_page_favicon:hover {
+    background-color: #1A1A22;
+}
+
+#history_page_text_col {
+    background-color: transparent;
+}
+
+#history_page_title_btn {
+    background-color: transparent;
+    color: #B8B8CC;
+    text-align: left;
+    font-size: 13px;
+    padding: 0 2px;
+    border-radius: 4px;
+}
+
+#history_page_title_btn:hover {
+    color: #7B6FF0;
+    background-color: transparent;
+}
+
+#history_page_url_label {
+    color: #38384E;
+    font-size: 11px;
+    padding: 0 2px;
+    background-color: transparent;
+}
+
+#history_page_time_label {
+    color: #2E2E42;
+    font-size: 11px;
+    background-color: transparent;
+}
+
+#history_page_empty {
+    color: #2A2A3E;
+    font-size: 14px;
+    padding: 60px;
+    background-color: transparent;
+    background-color: transparent;
+}
+
 /* ── Tooltips ────────────────────────────────────────────── */
 QToolTip {
     background-color: #1A1A22;

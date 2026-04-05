@@ -4,6 +4,9 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtCore import QUrl
 from PyQt6.QtGui import QKeySequence, QShortcut
 
+from ui.history_page import HistoryPage
+
+from utils.history_handler import record
 
 class Tabs(QWidget):
     def __init__(self):
@@ -20,14 +23,21 @@ class Tabs(QWidget):
         layout.addWidget(self.tabs_widget)
 
         self.tabs_widget.tabCloseRequested.connect(self.close_tab)
+        
+        self.tabs_widget.currentChanged.connect(self.on_tab_switched)
 
         QShortcut(QKeySequence("Ctrl+T"), self).activated.connect(self.add_tab)
         QShortcut(QKeySequence("Ctrl+W"), self).activated.connect(self.close_current_tab)
         QShortcut(QKeySequence("Ctrl+R"), self).activated.connect(
             lambda: self.get_current_browser() and self.get_current_browser().reload()
         )
+        QShortcut(QKeySequence("Ctrl+H"), self).activated.connect(self.add_history_tab)
 
+        self.sidebar = None
         self.add_tab("https://google.com")
+
+    def bind_sidebar(self, sidebar):
+        self.sidebar = sidebar
 
     def add_tab(self, url: Optional[str] = None):
         if not isinstance(url, str):
@@ -44,6 +54,37 @@ class Tabs(QWidget):
 
     def close_current_tab(self):
         self.close_tab(self.tabs_widget.currentIndex())
+        
+    def add_history_tab(self):
+        for i in range(self.tabs_widget.count()):
+            widget = self.tabs_widget.widget(1)
+            
+            if isinstance(widget, HistoryPage):
+                self.tabs_widget.setCurrentIndex(i)
+                widget.refresh()
+                return
+
+        page = HistoryPage(open_url_fn=lambda url: self.add_tab(url))
+        
+        index = self.tabs_widget.addTab(page, "🕘  History")
+        self.tabs_widget.setCurrentIndex(index)
+
+    def on_tab_switched(self, index: int):
+        widget = self.tabs_widget.widget(index)
+        if isinstance(widget, HistoryPage):
+            widget.refresh()
+            
+    def record_visit(self, browser: QWebEngineView, ok: bool):
+        if not ok:
+            return
+        
+        url = browser.url().toString()
+        title = browser.title()
+        
+        if self.sidebar:
+            self.sidebar.record_visit(title, url)
+        else:
+            record(title, url)
 
     def close_tab(self, index):
         if self.tabs_widget.count() > 1:
@@ -60,4 +101,7 @@ class Tabs(QWidget):
             self.tabs_widget.setTabIcon(index, icon)
 
     def get_current_browser(self):
-        return self.tabs_widget.currentWidget()
+        widget = self.tabs_widget.currentWidget()
+        if isinstance(widget, QWebEngineView):
+            return widget
+        return None

@@ -30,6 +30,7 @@ class TopBar(QWidget):
         self.toggle_sidebar_btn = QPushButton("☰")
         self.reload_btn = QPushButton("⟳")
         self.star_btn = QPushButton("★")
+        self.history_btn = QPushButton("🕘")
         self.add_tab_btn = QPushButton("+")
 
         self.search_bar = QLineEdit()
@@ -48,6 +49,7 @@ class TopBar(QWidget):
         self.forward_btn.setToolTip("Forward")
         self.reload_btn.setToolTip("Reload")
         self.star_btn.setToolTip("Bookmark this page")
+        self.history_btn.setToolTip("History  (Ctrl+H)")
         self.add_tab_btn.setToolTip("New tab  (Ctrl+T)")
         self.toggle_sidebar_btn.setToolTip("Toggle sidebar")
 
@@ -60,6 +62,7 @@ class TopBar(QWidget):
         layout.addWidget(self.search_bar, 1)
         layout.addSpacing(4)
         layout.addWidget(self.star_btn)
+        layout.addWidget(self.history_btn)
         layout.addWidget(self.add_tab_btn)
         layout.addSpacing(12)
         layout.addWidget(self.min_btn)
@@ -96,6 +99,7 @@ class TopBar(QWidget):
     def bind_tabs(self, tabs: Tabs):
         self.tabs = tabs
         self.add_tab_btn.clicked.connect(self.tabs.add_tab)
+        self.history_btn.clicked.connect(self.tabs.add_history_tab)
         self.tabs.tabs_widget.currentChanged.connect(self.on_tab_changed)
         self.search_bar.returnPressed.connect(self.load_url)
         self.on_tab_changed()
