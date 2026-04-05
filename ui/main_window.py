@@ -27,6 +27,7 @@ class MainWindow(QMainWindow):
         self.topbar.bind_tabs(self.tabs)
         self.topbar.bind_sidebar(self.sidebar)
         self.sidebar.bind_tabs(self.tabs)
+        self.tabs.bind_sidebar(self.sidebar)
 
         content = QHBoxLayout()
         

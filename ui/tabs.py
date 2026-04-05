@@ -51,6 +51,7 @@ class Tabs(QWidget):
 
         browser.titleChanged.connect(lambda title, b=browser: self.update_tab_title(b, title))
         browser.iconChanged.connect(lambda icon, b=browser: self.update_tab_icon(b, icon))
+        browser.loadFinished.connect(lambda ok, b=browser: self.record_visit(b, ok))
 
     def close_current_tab(self):
         self.close_tab(self.tabs_widget.currentIndex())
@@ -77,14 +78,10 @@ class Tabs(QWidget):
     def record_visit(self, browser: QWebEngineView, ok: bool):
         if not ok:
             return
-        
+
         url = browser.url().toString()
         title = browser.title()
-        
-        if self.sidebar:
-            self.sidebar.record_visit(title, url)
-        else:
-            record(title, url)
+        record(title, url)
 
     def close_tab(self, index):
         if self.tabs_widget.count() > 1:

@@ -23,7 +23,7 @@ def record(title: str, url: str):
     
     now = datetime.now()
     ts = now.strftime("%Y-%m-%dT%H:%M:%S")
-    minute = now.strftime("%Y-%m-%dT%H:%M:%S")
+    minute = now.strftime("%Y-%m-%dT%H:%M")
     
     def update(entries):
         filtered = [e for e in entries if not (e["url"] == url and e["timestamp"].startswith(minute))]
