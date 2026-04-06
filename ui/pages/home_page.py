@@ -15,20 +15,20 @@ class BookmarkTile(QWidget):
     def __init__(self, title: str, url: str, open_fn):
         super().__init__()
         self.setObjectName("bm_tile")
-        self.setFixedSize(88, 88)
+        self.setFixedSize(110, 110)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(0, 12, 0, 8)
-        layout.setSpacing(6)
+        layout.setContentsMargins(0, 14, 0, 10)
+        layout.setSpacing(8)
         layout.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
         # Favicon button (acts as the click target)
         icon_btn = QPushButton()
         icon_btn.setObjectName("bm_tile_icon")
-        icon_btn.setFixedSize(36, 36)
+        icon_btn.setFixedSize(64, 64)
         icon_btn.setIcon(get_favicon_from_url(url))
-        icon_btn.setIconSize(QSize(20, 20))
+        icon_btn.setIconSize(QSize(24, 24))
         icon_btn.clicked.connect(lambda: open_fn(url))
 
         # Title label — two lines max, centered
@@ -62,10 +62,10 @@ class WeatherCard(QWidget):
     def __init__(self):
         super().__init__()
         self.setObjectName("weather_card")
-        self.setFixedWidth(300)
+        self.setFixedWidth(340)
 
         layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 18, 20, 18)
+        layout.setContentsMargins(24, 22, 24, 22)
         layout.setSpacing(0)
 
         # Top row: city + icon
@@ -149,7 +149,7 @@ class HomePage(QWidget):
         container = QWidget()
         container.setObjectName("home_container")
         self._root = QVBoxLayout(container)
-        self._root.setContentsMargins(80, 60, 80, 60)
+        self._root.setContentsMargins(100, 72, 100, 72)
         self._root.setSpacing(0)
         self._root.setAlignment(Qt.AlignmentFlag.AlignTop)
 
@@ -185,12 +185,12 @@ class HomePage(QWidget):
         top_row.addWidget(self._clock)
 
         self._root.addLayout(top_row)
-        self._root.addSpacing(40)
+        self._root.addSpacing(52)
 
         # ── Weather + bookmarks row ───────────────────────
         mid_row = QHBoxLayout()
         mid_row.setAlignment(Qt.AlignmentFlag.AlignTop)
-        mid_row.setSpacing(40)
+        mid_row.setSpacing(52)
 
         self._weather = WeatherCard()
         mid_row.addWidget(self._weather, 0, Qt.AlignmentFlag.AlignTop)
@@ -206,7 +206,7 @@ class HomePage(QWidget):
         self._grid_widget = QWidget()
         self._grid_widget.setObjectName("home_bm_grid")
         self._grid = QGridLayout(self._grid_widget)
-        self._grid.setSpacing(10)
+        self._grid.setSpacing(14)
         self._grid.setContentsMargins(0, 0, 0, 0)
 
         bm_col.addWidget(self._grid_widget)

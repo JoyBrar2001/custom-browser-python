@@ -519,7 +519,7 @@ QDialog QPushButton:pressed {
 }
 
 #home_greeting {
-    font-size: 32px;
+    font-size: 38px;
     font-weight: 300;
     color: #C8C8DC;
     letter-spacing: -0.5px;
@@ -527,14 +527,14 @@ QDialog QPushButton:pressed {
 }
 
 #home_date {
-    font-size: 13px;
+    font-size: 14px;
     color: #38384E;
     background-color: transparent;
     letter-spacing: 0.3px;
 }
 
 #home_clock {
-    font-size: 42px;
+    font-size: 52px;
     font-weight: 200;
     color: #3A3A52;
     letter-spacing: -1px;
@@ -543,7 +543,7 @@ QDialog QPushButton:pressed {
 
 #home_section_label {
     color: #2E2E42;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 2px;
     background-color: transparent;
@@ -568,7 +568,7 @@ QDialog QPushButton:pressed {
 
 #bm_tile_icon {
     background-color: #1A1A24;
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 0;
 }
 
@@ -578,7 +578,7 @@ QDialog QPushButton:pressed {
 
 #bm_tile_label {
     color: #686878;
-    font-size: 10px;
+    font-size: 11px;
     background-color: transparent;
 }
 
@@ -597,7 +597,7 @@ QDialog QPushButton:pressed {
 }
 
 #weather_city {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     color: #686878;
     letter-spacing: 0.5px;
@@ -605,12 +605,12 @@ QDialog QPushButton:pressed {
 }
 
 #weather_icon {
-    font-size: 28px;
+    font-size: 32px;
     background-color: transparent;
 }
 
 #weather_temp {
-    font-size: 48px;
+    font-size: 56px;
     font-weight: 200;
     color: #C8C8DC;
     letter-spacing: -2px;
@@ -619,7 +619,7 @@ QDialog QPushButton:pressed {
 }
 
 #weather_desc {
-    font-size: 12px;
+    font-size: 13px;
     color: #38384E;
     background-color: transparent;
     padding-bottom: 2px;

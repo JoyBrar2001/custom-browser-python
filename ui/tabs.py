@@ -40,6 +40,18 @@ class Tabs(QWidget):
     def bind_sidebar(self, sidebar):
         self.sidebar = sidebar
 
+    
+    def go_home(self):
+        for i in range(self.tabs_widget.count()):
+            widget = self.tabs_widget.widget(i)
+            
+            if isinstance(widget, HomePage):
+                self.tabs_widget.setCurrentIndex(i)
+                widget.refresh()
+                return
+        
+        self.open_home_tab()
+
     def add_tab(self, url: Optional[str] = None):
         if not url:
             self.open_home_tab()
