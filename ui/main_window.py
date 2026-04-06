@@ -3,7 +3,7 @@ from PyQt6.QtWebEngineCore import QWebEngineProfile, QWebEnginePage
 from PyQt6.QtCore import Qt
 
 from ui.sidebar.sidebar import Sidebar
-from ui.tabs import Tabs
+from ui.tabs.tabs import Tabs
 from ui.topbar.topbar import TopBar
 from ui.resize_handle import ResizeHandle
 

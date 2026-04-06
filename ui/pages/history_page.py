@@ -9,8 +9,6 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 from utils import history_handler
-
-# ✅ NEW import
 from utils.favicon_worker import FaviconWorker, favicon_cache
 
 class HistoryPage(QWidget):

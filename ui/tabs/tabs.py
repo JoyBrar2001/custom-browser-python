@@ -33,9 +33,30 @@ class Tabs(QWidget):
             lambda: self.get_current_browser() and self.get_current_browser().reload()
         )
         QShortcut(QKeySequence("Ctrl+H"), self).activated.connect(self.add_history_tab)
-
+        
+        QShortcut(QKeySequence("Ctrl+Alt+Right"), self).activated.connect(self.next_tab)
+        QShortcut(QKeySequence("Ctrl+Alt+Left"), self).activated.connect(self.prev_tab)
+        for n in range(1, 10):
+            QShortcut(QKeySequence(f"Ctrl+{n}"), self).activated.connect(lambda i=n-1: self.jump_to_tab(i))
+        QShortcut(QKeySequence("Ctrl+0"), self).activated.connect(self.jump_to_last_tab)
+        
         self.sidebar = None
         self.add_tab()
+        
+    def next_tab(self):
+        count = self.tabs_widget.count()
+        self.tabs_widget.setCurrentIndex((self.tabs_widget.currentIndex() + 1) % count)
+        
+    def prev_tab(self):
+        count = self.tabs_widget.count()
+        self.tabs_widget.setCurrentIndex((self.tabs_widget.currentIndex() - 1) % count)
+        
+    def jump_to_tab(self, index: int):
+        if index < self.tabs_widget.count():
+            self.tabs_widget.setCurrentIndex(index)
+ 
+    def jump_to_last_tab(self):
+        self.tabs_widget.setCurrentIndex(self.tabs_widget.count() - 1)
 
     def bind_sidebar(self, sidebar):
         self.sidebar = sidebar
