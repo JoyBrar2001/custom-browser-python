@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
-    QWidget, QHBoxLayout, QPushButton, QLineEdit,
-    QMainWindow, QDialog, QVBoxLayout, QLabel
+    QWidget, QHBoxLayout, QPushButton,
+    QMainWindow, QDialog, QVBoxLayout, QLabel, QLineEdit
 )
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtCore import QPropertyAnimation, QUrl, Qt
@@ -10,34 +10,7 @@ from ui.tabs import Tabs
 from ui.sidebar.sidebar import Sidebar
 from utils.json_handler import write_file
 from utils.get_display_name import get_display_name
-
-class SearchBar(QLineEdit):
-    def __init__(self, topbar: TopBar):
-        super().__init__()
-        
-        self.topbar = topbar
-        self.is_focused = False
-        
-        self.setAlignment(Qt.AlignmentFlag.AlignLeft)
-    
-    def focusInEvent(self, event):
-        super().focusInEvent(event)
-        self.is_focused = True
-        
-        if self.topbar.current_browser:
-            full_url = self.topbar.current_browser.url().toString()
-            self.setText(full_url)
-            self.selectAll()
-            
-        self.setAlignment(Qt.AlignmentFlag.AlignLeft)
-    
-    def focusOutEvent(self, event):
-        super().focusOutEvent(event)
-        self.is_focused = False
-        
-        self.topbar.update_ui()
-        
-        self.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+from ui.topbar.search_bar import SearchBar
 
 class TopBar(QWidget):
     def __init__(self, parent: QMainWindow):
@@ -61,13 +34,15 @@ class TopBar(QWidget):
         self.history_btn = QPushButton("🕘")
         self.add_tab_btn = QPushButton("+")
 
+        # Search bar
         self.search_bar = SearchBar(self)
         self.search_bar.setPlaceholderText("Search or enter URL")
 
-        # Window controls — assign objectNames for targeted QSS
+        # Window controls
         self.min_btn = QPushButton("—")
         self.max_btn = QPushButton("⬜")
         self.close_btn = QPushButton("✕")
+
         self.min_btn.setObjectName("min_btn")
         self.max_btn.setObjectName("max_btn")
         self.close_btn.setObjectName("close_btn")
@@ -97,7 +72,7 @@ class TopBar(QWidget):
         layout.addWidget(self.max_btn)
         layout.addWidget(self.close_btn)
 
-        # Window control connections
+        # Window controls
         self.min_btn.clicked.connect(self.parent.showMinimized)
         self.max_btn.clicked.connect(self.toggle_maximized)
         self.close_btn.clicked.connect(self.parent.close)
@@ -139,9 +114,12 @@ class TopBar(QWidget):
     def toggle_sidebar(self):
         if not self.sidebar:
             return
+
         stack = self.sidebar.stack
+
         if not hasattr(self, "sidebar_open"):
             self.sidebar_open = True
+
         start = stack.maximumWidth()
         end = 0 if self.sidebar_open else self.sidebar.get_current_width()
         self.sidebar_open = not self.sidebar_open
@@ -159,25 +137,24 @@ class TopBar(QWidget):
         self.animation.start()
         self.animation2.start()
 
+    # ---------- Tab Change ----------
     def on_tab_changed(self):
         browser = self.tabs.get_current_browser()
-        
+
         if not browser:
             self.current_browser = None
-            
             self.back_btn.setEnabled(False)
             self.forward_btn.setEnabled(False)
             self.reload_btn.setEnabled(False)
-            
             self.search_bar.setText("")
             return
-        
+
         self.current_browser = browser
-        
-        self.back_btn.setEnabled(self.current_browser.history().canGoBack())
-        self.forward_btn.setEnabled(self.current_browser.history().canGoForward())
+
+        self.back_btn.setEnabled(browser.history().canGoBack())
+        self.forward_btn.setEnabled(browser.history().canGoForward())
         self.reload_btn.setEnabled(True)
-        
+
         try:
             self.back_btn.clicked.disconnect()
             self.forward_btn.clicked.disconnect()
@@ -185,41 +162,48 @@ class TopBar(QWidget):
             self.star_btn.clicked.disconnect()
         except Exception:
             pass
-        
+
         try:
             browser.urlChanged.disconnect()
         except Exception:
             pass
-        
+
         self.back_btn.clicked.connect(browser.back)
         self.forward_btn.clicked.connect(browser.forward)
         self.reload_btn.clicked.connect(browser.reload)
-        self.star_btn.clicked.connect(lambda: self.handle_bookmark(self.current_browser))
-        
+        self.star_btn.clicked.connect(lambda: self.handle_bookmark(browser))
+
         browser.urlChanged.connect(self.update_ui)
-        
+
         self.update_ui()
 
+    # ---------- UI Update ----------
     def update_ui(self):
         if not self.current_browser:
             return
-        
+
         self.back_btn.setEnabled(self.current_browser.history().canGoBack())
         self.forward_btn.setEnabled(self.current_browser.history().canGoForward())
-        
+
         if not self.search_bar.is_focused:
             url = self.current_browser.url().toString()
             self.search_bar.setText(get_display_name(url))
+
+            # Default state → centered
             self.search_bar.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
+    # ---------- Load URL ----------
     def load_url(self):
         url = self.search_bar.text().strip()
+
         if not url:
             return
+
         if "." not in url:
             url = f"https://www.google.com/search?q={url}"
         elif not url.startswith("http"):
             url = "http://" + url
+
         self.current_browser.setUrl(QUrl(url))
 
     # ---------- Bookmark ----------
@@ -227,21 +211,27 @@ class TopBar(QWidget):
         dialog = QDialog(self)
         dialog.setWindowTitle("Add Bookmark")
         dialog.setFixedWidth(320)
+
         layout = QVBoxLayout()
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(8)
+
         label = QLabel("BOOKMARK NAME")
         label.setObjectName("section_label")
+
         name_input = QLineEdit()
         name_input.setText(browser.title())
+
         submit = QPushButton("Save Bookmark")
         submit.clicked.connect(
             lambda: self.save_bookmark(dialog, name_input.text(), browser.url().toString())
         )
+
         layout.addWidget(label)
         layout.addWidget(name_input)
         layout.addSpacing(6)
         layout.addWidget(submit)
+
         dialog.setLayout(layout)
         dialog.exec()
 
@@ -250,6 +240,8 @@ class TopBar(QWidget):
             "config/bookmarks.json",
             update_fn=lambda data: data + [{"title": name, "path": path}]
         )
+
         if self.sidebar:
             self.sidebar.initBookmarks()
+
         dialog.close()
