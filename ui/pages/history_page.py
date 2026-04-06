@@ -3,36 +3,16 @@ from PyQt6.QtWidgets import (
     QPushButton, QLabel, QScrollArea,
     QApplication
 )
-from PyQt6.QtCore import Qt, QSize, QThread, pyqtSignal
+from PyQt6.QtCore import Qt
+from PyQt6 import sip
 from datetime import datetime
 from urllib.parse import urlparse
 
-from utils.get_favicon import get_favicon_from_url
 from utils import history_handler
-from PyQt6 import sip
 
-# ✅ Cache icons by domain
-favicon_cache = {}
+# ✅ NEW import
+from utils.favicon_worker import FaviconWorker, favicon_cache
 
-
-# ─────────────────────────────────────────────
-# Worker thread for async favicon loading
-# ─────────────────────────────────────────────
-class FaviconWorker(QThread):
-    finished = pyqtSignal(str, object)  # url, icon
-
-    def __init__(self, url):
-        super().__init__()
-        self.url = url
-
-    def run(self):
-        icon = get_favicon_from_url(self.url)
-        self.finished.emit(self.url, icon)
-
-
-# ─────────────────────────────────────────────
-# History Page
-# ─────────────────────────────────────────────
 class HistoryPage(QWidget):
     def __init__(self, open_url_fn):
         super().__init__()
@@ -126,22 +106,17 @@ class HistoryPage(QWidget):
                     day_str = "Unknown date"
                     time_str = ""
 
-                # ── Day Divider ──
                 if day_str != current_day:
                     current_day = day_str
                     divider = QLabel(day_str)
                     divider.setObjectName("history_page_day_divider")
                     self._list_layout.addWidget(divider)
 
-                # ── Entry Row ──
                 self._add_entry_row(url, title, ts, time_str)
 
         self.loader.hide()
         self._list_widget.show()
 
-    # ─────────────────────────────────────────
-    # Create single history row
-    # ─────────────────────────────────────────
     def _add_entry_row(self, url, title, ts, time_str):
         row = QWidget()
         row.setObjectName("history_page_row")
@@ -150,46 +125,37 @@ class HistoryPage(QWidget):
         row_layout.setContentsMargins(12, 0, 12, 0)
         row_layout.setSpacing(10)
 
-        # ── Favicon (lazy) ──
         favicon_btn = QPushButton()
         favicon_btn.setObjectName("history_page_favicon")
         favicon_btn.setFixedSize(28, 28)
-        favicon_btn.setText("🌐")  # placeholder
+        favicon_btn.setText("🌐")
         favicon_btn.setToolTip(url)
         favicon_btn.clicked.connect(lambda _, u=url: self.open_url_fn(u))
 
-        # ── Title ──
         title_btn = QPushButton(title)
         title_btn.setObjectName("history_page_title_btn")
         title_btn.setToolTip(url)
         title_btn.clicked.connect(lambda _, u=url: self.open_url_fn(u))
 
-        # ── URL ──
         url_label = QLabel(url if len(url) < 72 else url[:70] + "…")
         url_label.setObjectName("history_page_url_label")
 
-        # ── Time ──
         time_label = QLabel(time_str)
         time_label.setObjectName("history_page_time_label")
         time_label.setFixedWidth(40)
         time_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
 
-        # ── Delete ──
         del_btn = QPushButton("✕")
         del_btn.setObjectName("delete_btn")
         del_btn.clicked.connect(lambda _, u=url, t=ts: self._delete_entry(u, t))
 
-        # ── Text column ──
         text_col = QWidget()
-        text_col.setObjectName("history_page_text_col")
-
         text_layout = QVBoxLayout(text_col)
         text_layout.setContentsMargins(0, 6, 0, 6)
         text_layout.setSpacing(1)
         text_layout.addWidget(title_btn)
         text_layout.addWidget(url_label)
 
-        # ── Layout ──
         row_layout.addWidget(favicon_btn)
         row_layout.addWidget(text_col, 1)
         row_layout.addWidget(time_label)
@@ -197,12 +163,8 @@ class HistoryPage(QWidget):
 
         self._list_layout.addWidget(row)
 
-        # Lazy load favicon
         self._load_favicon_async(url, favicon_btn)
 
-    # ─────────────────────────────────────────
-    # Async favicon loader with caching
-    # ─────────────────────────────────────────
     def _load_favicon_async(self, url, button):
         domain = urlparse(url).netloc
 
@@ -215,7 +177,6 @@ class HistoryPage(QWidget):
         self._workers.append(worker)
 
         def on_done(u, icon):
-            # ✅ If button was deleted, skip safely
             if sip.isdeleted(button):
                 return
 
@@ -233,11 +194,7 @@ class HistoryPage(QWidget):
         worker.finished.connect(on_done)
         worker.start()
 
-    # ─────────────────────────────────────────
-    # Helpers
-    # ─────────────────────────────────────────
     def _clear_layout(self):
-        # 🛑 Stop all running workers
         for worker in self._workers:
             worker.quit()
             worker.wait()
