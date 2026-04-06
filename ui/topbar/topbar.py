@@ -6,7 +6,7 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtCore import QPropertyAnimation, QUrl, Qt
 from PyQt6.QtGui import QMouseEvent
 
-from ui.tabs import Tabs
+from ui.tabs.tabs import Tabs
 from ui.sidebar.sidebar import Sidebar
 from utils.json_handler import write_file
 from utils.get_display_name import get_display_name

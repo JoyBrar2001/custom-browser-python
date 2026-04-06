@@ -21,7 +21,7 @@ class SearchBar(QLineEdit):
             self.selectAll()
 
         # Keep centered while focused
-        self.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
     def focusOutEvent(self, event):
         super().focusOutEvent(event)
@@ -31,4 +31,4 @@ class SearchBar(QLineEdit):
         self.topbar.update_ui()
 
         # After user interaction → left align
-        self.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.setAlignment(Qt.AlignmentFlag.AlignHCenter)
