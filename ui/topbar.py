@@ -133,9 +133,23 @@ class TopBar(QWidget):
 
     def on_tab_changed(self):
         browser = self.tabs.get_current_browser()
+        
         if not browser:
+            self.current_browser = None
+            
+            self.back_btn.setEnabled(False)
+            self.forward_btn.setEnabled(False)
+            self.reload_btn.setEnabled(False)
+            
+            self.search_bar.setText("")
             return
+        
         self.current_browser = browser
+        
+        self.back_btn.setEnabled(self.current_browser.history().canGoBack())
+        self.forward_btn.setEnabled(self.current_browser.history().canGoForward())
+        self.reload_btn.setEnabled(True)
+        
         try:
             self.back_btn.clicked.disconnect()
             self.forward_btn.clicked.disconnect()
@@ -143,15 +157,19 @@ class TopBar(QWidget):
             self.star_btn.clicked.disconnect()
         except Exception:
             pass
+        
         try:
             browser.urlChanged.disconnect()
         except Exception:
             pass
+        
         self.back_btn.clicked.connect(browser.back)
         self.forward_btn.clicked.connect(browser.forward)
         self.reload_btn.clicked.connect(browser.reload)
         self.star_btn.clicked.connect(lambda: self.handle_bookmark(self.current_browser))
+        
         browser.urlChanged.connect(self.update_ui)
+        
         self.update_ui()
 
     def update_ui(self):
