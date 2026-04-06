@@ -5,6 +5,7 @@ from PyQt6.QtCore import QUrl
 from PyQt6.QtGui import QKeySequence, QShortcut
 
 from ui.pages.history_page import HistoryPage
+from ui.pages.home_page import HomePage
 
 from utils.history_handler import record
 
@@ -34,15 +35,26 @@ class Tabs(QWidget):
         QShortcut(QKeySequence("Ctrl+H"), self).activated.connect(self.add_history_tab)
 
         self.sidebar = None
-        self.add_tab("https://google.com")
+        self.add_tab()
 
     def bind_sidebar(self, sidebar):
         self.sidebar = sidebar
 
     def add_tab(self, url: Optional[str] = None):
-        if not isinstance(url, str):
+        if not url:
+            self.open_home_tab()
+        else:
+            self.open_browser_tab(url)
+            
+    def open_home_tab(self):
+        page = HomePage(open_url_fn=self.open_browser_tab)
+        index = self.tabs_widget.addTab(page, "✦  Home")
+        self.tabs_widget.setCurrentIndex(index)
+            
+    def open_browser_tab(self, url: str):
+        if not isinstance(url, str) or not url:
             url = "https://google.com"
-
+            
         browser = QWebEngineView()
         browser.setUrl(QUrl(url))
 

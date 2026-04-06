@@ -504,6 +504,148 @@ QDialog QPushButton:pressed {
     background-color: transparent;
 }
 
+/* ── Home Page ───────────────────────────────────────────── */
+#home_page {
+    background-color: #0D0D10;
+}
+
+#home_scroll {
+    background-color: #0D0D10;
+    border: none;
+}
+
+#home_container {
+    background-color: #0D0D10;
+}
+
+#home_greeting {
+    font-size: 32px;
+    font-weight: 300;
+    color: #C8C8DC;
+    letter-spacing: -0.5px;
+    background-color: transparent;
+}
+
+#home_date {
+    font-size: 13px;
+    color: #38384E;
+    background-color: transparent;
+    letter-spacing: 0.3px;
+}
+
+#home_clock {
+    font-size: 42px;
+    font-weight: 200;
+    color: #3A3A52;
+    letter-spacing: -1px;
+    background-color: transparent;
+}
+
+#home_section_label {
+    color: #2E2E42;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    background-color: transparent;
+    padding: 0;
+}
+
+/* ── Bookmark Tiles ──────────────────────────────────────── */
+#home_bm_grid {
+    background-color: transparent;
+}
+
+#bm_tile {
+    background-color: #111116;
+    border: 1px solid #1A1A22;
+    border-radius: 14px;
+}
+
+#bm_tile:hover {
+    background-color: #15151C;
+    border-color: #2A2A3A;
+}
+
+#bm_tile_icon {
+    background-color: #1A1A24;
+    border-radius: 10px;
+    padding: 0;
+}
+
+#bm_tile_icon:hover {
+    background-color: #22223A;
+}
+
+#bm_tile_label {
+    color: #686878;
+    font-size: 10px;
+    background-color: transparent;
+}
+
+#home_empty_label {
+    color: #2A2A3E;
+    font-size: 13px;
+    background-color: transparent;
+    padding: 8px 0;
+}
+
+/* ── Weather Card ────────────────────────────────────────── */
+#weather_card {
+    background-color: #111116;
+    border: 1px solid #1A1A22;
+    border-radius: 18px;
+}
+
+#weather_city {
+    font-size: 13px;
+    font-weight: 500;
+    color: #686878;
+    letter-spacing: 0.5px;
+    background-color: transparent;
+}
+
+#weather_icon {
+    font-size: 28px;
+    background-color: transparent;
+}
+
+#weather_temp {
+    font-size: 48px;
+    font-weight: 200;
+    color: #C8C8DC;
+    letter-spacing: -2px;
+    background-color: transparent;
+    padding: 2px 0 0 0;
+}
+
+#weather_desc {
+    font-size: 12px;
+    color: #38384E;
+    background-color: transparent;
+    padding-bottom: 2px;
+}
+
+#weather_divider {
+    background-color: #1A1A22;
+    color: #1A1A22;
+    max-height: 1px;
+}
+
+#weather_stat_value {
+    font-size: 13px;
+    font-weight: 500;
+    color: #8888A0;
+    background-color: transparent;
+}
+
+#weather_stat_label {
+    font-size: 9px;
+    font-weight: 600;
+    color: #2E2E42;
+    letter-spacing: 1px;
+    background-color: transparent;
+}
+
 /* ── Tooltips ────────────────────────────────────────────── */
 QToolTip {
     background-color: #1A1A22;
