@@ -52,13 +52,12 @@ class Tabs(QWidget):
         browser.titleChanged.connect(lambda title, b=browser: self.update_tab_title(b, title))
         browser.iconChanged.connect(lambda icon, b=browser: self.update_tab_icon(b, icon))
         # browser.loadFinished.connect(lambda _, b=browser: self.record_visit(b))
-        browser.urlChanged.connect(lambda url, b=browser: self.on_url_record(b, url))
+        browser.urlChanged.connect(lambda url, b=browser: self.on_url_changed(b, url))
         browser.titleChanged.connect(lambda title, b=browser: self.on_title_changed(b, title))
 
     def on_url_changed(self, browser, url):
         # store latest URL temporarily
         browser.last_url = url.toString()
-
 
     def on_title_changed(self, browser, title):
         url = getattr(browser, "last_url", browser.url().toString())

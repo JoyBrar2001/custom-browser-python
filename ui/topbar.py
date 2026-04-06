@@ -9,7 +9,35 @@ from PyQt6.QtGui import QMouseEvent
 from ui.tabs import Tabs
 from ui.sidebar.sidebar import Sidebar
 from utils.json_handler import write_file
+from utils.get_display_name import get_display_name
 
+class SearchBar(QLineEdit):
+    def __init__(self, topbar: TopBar):
+        super().__init__()
+        
+        self.topbar = topbar
+        self.is_focused = False
+        
+        self.setAlignment(Qt.AlignmentFlag.AlignLeft)
+    
+    def focusInEvent(self, event):
+        super().focusInEvent(event)
+        self.is_focused = True
+        
+        if self.topbar.current_browser:
+            full_url = self.topbar.current_browser.url().toString()
+            self.setText(full_url)
+            self.selectAll()
+            
+        self.setAlignment(Qt.AlignmentFlag.AlignLeft)
+    
+    def focusOutEvent(self, event):
+        super().focusOutEvent(event)
+        self.is_focused = False
+        
+        self.topbar.update_ui()
+        
+        self.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
 class TopBar(QWidget):
     def __init__(self, parent: QMainWindow):
@@ -33,7 +61,7 @@ class TopBar(QWidget):
         self.history_btn = QPushButton("🕘")
         self.add_tab_btn = QPushButton("+")
 
-        self.search_bar = QLineEdit()
+        self.search_bar = SearchBar(self)
         self.search_bar.setPlaceholderText("Search or enter URL")
 
         # Window controls — assign objectNames for targeted QSS
@@ -175,10 +203,14 @@ class TopBar(QWidget):
     def update_ui(self):
         if not self.current_browser:
             return
+        
         self.back_btn.setEnabled(self.current_browser.history().canGoBack())
         self.forward_btn.setEnabled(self.current_browser.history().canGoForward())
-        if not self.search_bar.hasFocus():
-            self.search_bar.setText(self.current_browser.url().toString())
+        
+        if not self.search_bar.is_focused:
+            url = self.current_browser.url().toString()
+            self.search_bar.setText(get_display_name(url))
+            self.search_bar.setAlignment(Qt.AlignmentFlag.AlignHCenter)
 
     def load_url(self):
         url = self.search_bar.text().strip()
